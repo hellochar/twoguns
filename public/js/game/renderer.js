@@ -1,5 +1,4 @@
-function Renderer(game, viewportWidth) {
-    this.viewportWidth = viewportWidth;
+function Renderer(game) {
     this.center = new b2Vec2; //world coordinates
     this.scale = 30; //pixel distances -> world distances
     this.game = game;
