@@ -4,8 +4,6 @@ socket.on('news', function (data) {
     socket.emit('my other event', { my: 'data' });
 });
 
-var game = new Game();
-
 var keysPressed = {}; //key1: true, key2: true, key3: true
 var mouse = {
     x : 0,
@@ -18,26 +16,29 @@ var framework = {
     setup : function() {
         this.cq = cq().framework(this, this);
         this.cq.appendTo("body");
+        this.game = new Game(this.cq);
     },
 
     /* game logic loop */
     onStep: function(delta, time) {
-        game.step(keysPressed, mouse);
+        this.game.step(keysPressed, mouse);
     },
 
     /* rendering loop */
     onRender: function(delta, time) {
-        game.render(this.cq, keysPressed, mouse);
+        this.game.render(this.cq, keysPressed, mouse);
     },
 
     /* window resize */
     onResize: function(width, height) {
         console.log(this);
         /* resize canvas with window */
-        // this.cq.canvas.width = width;
-        // this.cq.canvas.height = height;
         //change camera transform
-        game.camera.resize(width, height);
+        if(this.game) {
+            this.game.cq.canvas.width = width;
+            this.game.cq.canvas.height = height;
+            this.game.camera.resize(width, height);
+        }
     },
 
     /* mouse and touch events */
