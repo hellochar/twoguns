@@ -22,27 +22,25 @@
         <![endif]-->
 
         <!-- Add your site or application content here -->
-        <p>Hello world! This is HTML5 Boilerplate.</p>
 
-        <canvas id="canvas" width="1000" height="600" style="background-color:#333333;" ></canvas>
-
-        <script src="/socket.io/socket.io.js"></script>
-
-        <script src="js/Box2dWeb-2.1.a.3.min.js"></script>
-        <script src="js/canvasquery.js"></script>
-        <script src="js/camera.js"></script>
-
+        <!-- external libs -->
         <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
         <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.9.1.min.js"><\/script>')</script>
         <script src="js/plugins.js"></script>
+        <script src="/socket.io/socket.io.js"></script>
+        <script src="js/Box2dWeb-2.1.a.3.min.js"></script>
+        <script src="js/canvasquery.js"></script>
+
+
+        <!-- making coding more convenient -->
+        <script src="js/plumbing.js"></script>
+
+        <!-- game logic -->
+        <script src="js/game/game.js"></script>
+
+
+        <!-- framework code; setting everything up and jumpstarting things -->
         <script src="js/main.js"></script>
 
-        <!-- Google Analytics: change UA-XXXXX-X to be your site's ID. -->
-        <script>
-            var _gaq=[['_setAccount','UA-XXXXX-X'],['_trackPageview']];
-            (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
-            g.src='//www.google-analytics.com/ga.js';
-            s.parentNode.insertBefore(g,s)}(document,'script'));
-        </script>
     </body>
 </html>

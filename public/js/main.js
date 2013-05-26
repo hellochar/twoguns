@@ -4,205 +4,65 @@ socket.on('news', function (data) {
     socket.emit('my other event', { my: 'data' });
 });
 
+var game = new Game();
 
-function init() {
-    var   b2Vec2 = Box2D.Common.Math.b2Vec2
-        ,  b2AABB = Box2D.Collision.b2AABB
-        ,   b2BodyDef = Box2D.Dynamics.b2BodyDef
-        ,   b2Body = Box2D.Dynamics.b2Body
-        ,   b2FixtureDef = Box2D.Dynamics.b2FixtureDef
-        ,   b2Fixture = Box2D.Dynamics.b2Fixture
-        ,   b2World = Box2D.Dynamics.b2World
-        ,   b2MassData = Box2D.Collision.Shapes.b2MassData
-        ,   b2PolygonShape = Box2D.Collision.Shapes.b2PolygonShape
-        ,   b2CircleShape = Box2D.Collision.Shapes.b2CircleShape
-        ,   b2DebugDraw = Box2D.Dynamics.b2DebugDraw
-        ,  b2MouseJointDef =  Box2D.Dynamics.Joints.b2MouseJointDef
-        ;
+var keysPressed = {}; //key1: true, key2: true, key3: true
+var mouse = {
+    x : 0,
+    y : 0, //pixel coordinates of mouse relative to top-left of canvas
+    button : -1, //-1,0,1,2 === not-pressed, left, middle, right
+}
 
-    var world = new b2World(
-            new b2Vec2(0, 10)    //gravity
-            ,  true                 //allow sleep
-            );
+var framework = {
 
-    var fixDef = new b2FixtureDef;
-    fixDef.density = 1.0;
-    fixDef.friction = 0.5;
-    fixDef.restitution = 0.2;
+    setup : function() {
+        this.cq = cq().framework(this, this);
+        this.cq.appendTo("body");
+    },
 
-    var bodyDef = new b2BodyDef;
+    /* game logic loop */
+    onStep: function(delta, time) {
+        game.step(keysPressed, mouse);
+    },
 
-    //create ground
-    bodyDef.type = b2Body.b2_staticBody;
-    fixDef.shape = new b2PolygonShape;
-    fixDef.shape.SetAsBox(20, 2);
-    bodyDef.position.Set(10, 400 / 30 + 1.8);
-    world.CreateBody(bodyDef).CreateFixture(fixDef);
-    bodyDef.position.Set(10, -1.8);
-    world.CreateBody(bodyDef).CreateFixture(fixDef);
-    fixDef.shape.SetAsBox(2, 14);
-    bodyDef.position.Set(-1.8, 13);
-    world.CreateBody(bodyDef).CreateFixture(fixDef);
-    bodyDef.position.Set(21.8, 13);
-    world.CreateBody(bodyDef).CreateFixture(fixDef);
+    /* rendering loop */
+    onRender: function(delta, time) {
+        game.render(this.cq, keysPressed, mouse);
+    },
 
+    /* window resize */
+    onResize: function(width, height) {
+        console.log(this);
+        /* resize canvas with window */
+        // this.cq.canvas.width = width;
+        // this.cq.canvas.height = height;
+        //change camera transform
+        game.camera.resize(width, height);
+    },
 
-    //create some objects
-    bodyDef.type = b2Body.b2_dynamicBody;
-    for(var i = 0; i < 10; ++i) {
-        if(Math.random() > 0.5) {
-            fixDef.shape = new b2PolygonShape;
-            fixDef.shape.SetAsBox(
-                    Math.random() + 0.1 //half width
-                    ,  Math.random() + 0.1 //half height
-                    );
-        } else {
-            fixDef.shape = new b2CircleShape(
-                    Math.random() + 0.1 //radius
-                    );
-        }
-        bodyDef.position.x = Math.random() * 10;
-        bodyDef.position.y = Math.random() * 10;
-        world.CreateBody(bodyDef).CreateFixture(fixDef);
-    }
+    /* mouse and touch events */
+    onMouseDown: function(x, y, button) {
+        mouse.button = button;
+        mouse.x = x;
+        mouse.y = y;
+    },
+    onMouseUp: function(x, y, button) {
+        mouse.button = -1;
+        mouse.x = x;
+        mouse.y = y;
+    },
+    onMouseMove: function(x, y) {
+        mouse.x = x;
+        mouse.y = y;
+    },
 
-    //setup debug draw
-    var debugDraw = new b2DebugDraw();
-    var canvas = document.getElementById("canvas");
-    var ctx = canvas.getContext("2d");
-    debugDraw.SetSprite(ctx);
-    debugDraw.SetDrawScale(30.0);
-    debugDraw.SetFillAlpha(0.5);
-    debugDraw.SetLineThickness(1.0);
-    debugDraw.SetFlags(b2DebugDraw.e_shapeBit | b2DebugDraw.e_jointBit);
-    world.SetDebugDraw(debugDraw);
-
-    camera = new Camera(ctx);
-    camera.zoomTo(canvas.width);
-    camera.moveTo(canvas.width/2, canvas.height/2);
-
-    window.setInterval(update, 1000 / 60);
-
-    //mouse
-
-    var mouseX, mouseY, mousePVec, isMouseDown, selectedBody, mouseJoint;
-    var canvasPosition = getElementPosition(document.getElementById("canvas"));
-
-    document.addEventListener("mousemove", handleMouseMove, true);
-
-    document.addEventListener("mousedown", function(e) {
-        isMouseDown = true;
-        handleMouseDrag(e);
-        document.addEventListener("mousemove", handleMouseDrag, true);
-    }, true);
-
-    document.addEventListener("mouseup", function() {
-        document.removeEventListener("mousemove", handleMouseDrag, true);
-        isMouseDown = false;
-        mouseX = undefined;
-        mouseY = undefined;
-    }, true);
-
-    function handleMouseMove(e) {
-        var mouseXScreen = (e.clientX - canvasPosition.x);
-        var mouseYScreen = (e.clientY - canvasPosition.y);
-
-        camera.moveTo(mouseXScreen, mouseYScreen);
-    }
-
-    function handleMouseDrag(e) {
-        var mouseXScreen = (e.clientX - canvasPosition.x);
-        var mouseYScreen = (e.clientY - canvasPosition.y);
-
-
-        var box2DCoords = camera.screenToWorld(mouseXScreen, mouseYScreen);
-
-        mouseX = box2DCoords.x / 30;
-        mouseY = box2DCoords.y / 30;
-    };
-
-    function getBodyAtMouse() {
-        mousePVec = new b2Vec2(mouseX, mouseY);
-        var aabb = new b2AABB();
-        aabb.lowerBound.Set(mouseX - 0.001, mouseY - 0.001);
-        aabb.upperBound.Set(mouseX + 0.001, mouseY + 0.001);
-
-        // Query the world for overlapping shapes.
-
-        selectedBody = null;
-        world.QueryAABB(getBodyCB, aabb);
-        return selectedBody;
-    }
-
-    function getBodyCB(fixture) {
-        if(fixture.GetBody().GetType() != b2Body.b2_staticBody) {
-            if(fixture.GetShape().TestPoint(fixture.GetBody().GetTransform(), mousePVec)) {
-                selectedBody = fixture.GetBody();
-                return false;
-            }
-        }
-        return true;
-    }
-
-    //update
-
-    function update() {
-
-        if(isMouseDown && (!mouseJoint)) {
-            var body = getBodyAtMouse();
-            if(body) {
-                var md = new b2MouseJointDef();
-                md.bodyA = world.GetGroundBody();
-                md.bodyB = body;
-                md.target.Set(mouseX, mouseY);
-                md.collideConnected = true;
-                md.maxForce = 300.0 * body.GetMass();
-                mouseJoint = world.CreateJoint(md);
-                body.SetAwake(true);
-            }
-        }
-
-        if(mouseJoint) {
-            if(isMouseDown) {
-                mouseJoint.SetTarget(new b2Vec2(mouseX, mouseY));
-            } else {
-                world.DestroyJoint(mouseJoint);
-                mouseJoint = null;
-            }
-        }
-
-        world.Step(1 / 60, 10, 10);
-        cq('#canvas').clear('black');
-        camera.begin();
-        world.DrawDebugData();
-        camera.end();
-        world.ClearForces();
-    };
-
-    //helpers
-
-    //http://js-tut.aardon.de/js-tut/tutorial/position.html
-    function getElementPosition(element) {
-        var elem=element, tagname="", x=0, y=0;
-
-        while((typeof(elem) == "object") && (typeof(elem.tagName) != "undefined")) {
-            y += elem.offsetTop;
-            x += elem.offsetLeft;
-            tagname = elem.tagName.toUpperCase();
-
-            if(tagname == "BODY")
-                elem=0;
-
-            if(typeof(elem) == "object") {
-                if(typeof(elem.offsetParent) == "object")
-                    elem = elem.offsetParent;
-            }
-        }
-
-        return {x: x, y: y};
-    }
-
-
+    /* keyboard events */
+    onKeyDown: function(key) {
+        keysPressed[key] = true;
+    },
+    onKeyUp: function(key) {
+        delete keysPressed[key];
+    },
 };
 
-init();
+framework.setup();
