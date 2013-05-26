@@ -1,4 +1,4 @@
-function Camera(game, viewportWidth) {
+function Renderer(game, viewportWidth) {
     this.viewportWidth = viewportWidth;
     this.center = new b2Vec2; //world coordinates
     this.scale = 30; //pixel distances -> world distances
@@ -10,23 +10,23 @@ function Camera(game, viewportWidth) {
     game.world.SetDebugDraw(this.debugDraw);
 }
 
-Camera.prototype.lookAt = function(center) {
+Renderer.prototype.lookAt = function(center) {
     this.center.SetV(center);
 }
 
-Camera.prototype.translate = function(delta) {
+Renderer.prototype.translate = function(delta) {
     this.center.Add(delta);
 }
 
-Camera.prototype.translateScreen = function(delta) {
+Renderer.prototype.translateScreen = function(delta) {
     delta.Multiply(1 / this.scale);
     this.center.Add(delta);
 }
 
-Camera.prototype.resize = function(width, height) {
+Renderer.prototype.resize = function(width, height) {
 }
 
-Camera.prototype.render = function(cq) {
+Renderer.prototype.render = function(cq) {
     this.debugDraw.SetSprite(cq.context);
     this.debugDraw.SetDrawScale(this.scale);
     this.debugDraw.SetFillAlpha(0.5);

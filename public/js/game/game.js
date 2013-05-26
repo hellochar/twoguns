@@ -4,7 +4,7 @@ function Game() {
             ,  true                 //allow sleep
             );
 
-    this.camera = new Camera(this);
+    this.renderer = new Renderer(this);
 
     var fixDef = new b2FixtureDef;
     fixDef.density = 1.0;
@@ -57,7 +57,7 @@ Game.prototype.step = function(keysPressed, mouse) {
 }
 
 Game.prototype.render = function(cq, keysPressed, mouse) {
-    this.camera.lookAt(this.you.GetPosition());
-    this.camera.translateScreen(new b2Vec2(mouse.x - cq.canvas.width/2, mouse.y - cq.canvas.height/2));
-    this.camera.render(cq);
+    this.renderer.lookAt(this.you.GetPosition());
+    this.renderer.translateScreen(new b2Vec2(mouse.x - cq.canvas.width/2, mouse.y - cq.canvas.height/2));
+    this.renderer.render(cq);
 }

@@ -37,7 +37,7 @@ var framework = {
         if(this.game) {
             this.game.cq.canvas.width = width;
             this.game.cq.canvas.height = height;
-            this.game.camera.resize(width, height);
+            this.game.renderer.resize(width, height);
         }
     },
 
