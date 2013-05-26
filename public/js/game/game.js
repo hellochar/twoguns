@@ -1,10 +1,15 @@
+//model of the game
+//
+//  there is a physics world, with objects etc.
+//  there are players within the physics world
+//  there are bullets owned by players
+//  there is a win/lose condition
+
 function Game() {
     var world = this.world = new b2World(
             new b2Vec2(0, 10)    //gravity
             ,  true                 //allow sleep
             );
-
-    this.renderer = new Renderer(this);
 
     var fixDef = new b2FixtureDef;
     fixDef.density = 1.0;
@@ -54,10 +59,4 @@ Game.prototype.step = function(keysPressed, mouse) {
     //todo make player respond to input
     this.world.Step(1 / 60, 10, 10);
     this.world.ClearForces();
-}
-
-Game.prototype.render = function(cq, keysPressed, mouse) {
-    this.renderer.lookAt(this.you.GetPosition());
-    this.renderer.translateScreen(new b2Vec2(mouse.x - cq.canvas.width/2, mouse.y - cq.canvas.height/2));
-    this.renderer.render(cq);
 }

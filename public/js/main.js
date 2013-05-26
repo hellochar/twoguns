@@ -11,12 +11,15 @@ var mouse = {
     button : -1, //-1,0,1,2 === not-pressed, left, middle, right
 }
 
+//The framework hooks the renderer and game model together, and also handles events
+//Events make the core of the framework. You can think of the game as just being a bunch of events happening, and responding accordingly
 var framework = {
 
     setup : function() {
         this.cq = cq().framework(this, this);
         this.cq.appendTo("body");
-        this.game = new Game(this.cq);
+        this.game = new Game();
+        this.renderer = new Renderer();
     },
 
     /* game logic loop */
@@ -26,18 +29,16 @@ var framework = {
 
     /* rendering loop */
     onRender: function(delta, time) {
-        this.game.render(this.cq, keysPressed, mouse);
+        this.renderer.render(this.cq, keysPressed, mouse, this.game);
     },
 
     /* window resize */
     onResize: function(width, height) {
-        console.log(this);
         /* resize canvas with window */
         //change camera transform
-        if(this.game) {
-            this.game.cq.canvas.width = width;
-            this.game.cq.canvas.height = height;
-            this.game.renderer.resize(width, height);
+        if(this.cq) {
+            this.cq.canvas.width = width;
+            this.cq.canvas.height = height;
         }
     },
 

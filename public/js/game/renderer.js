@@ -1,12 +1,10 @@
-function Renderer(game) {
+function Renderer() {
     this.center = new b2Vec2; //world coordinates
     this.scale = 30; //pixel distances -> world distances
-    this.game = game;
 
     //setup debug draw
     this.debugDraw = new b2DebugDraw();
     this.debugDraw.SetFlags(b2DebugDraw.e_shapeBit | b2DebugDraw.e_jointBit);
-    game.world.SetDebugDraw(this.debugDraw);
 }
 
 Renderer.prototype.lookAt = function(center) {
@@ -22,10 +20,11 @@ Renderer.prototype.translateScreen = function(delta) {
     this.center.Add(delta);
 }
 
-Renderer.prototype.resize = function(width, height) {
-}
+Renderer.prototype.render = function(cq, keysPressed, mouse, game) {
+    game.world.SetDebugDraw(this.debugDraw);
+    this.lookAt(game.you.GetPosition());
+    this.translateScreen(new b2Vec2(mouse.x - cq.canvas.width/2, mouse.y - cq.canvas.height/2));
 
-Renderer.prototype.render = function(cq) {
     this.debugDraw.SetSprite(cq.context);
     this.debugDraw.SetDrawScale(this.scale);
     this.debugDraw.SetFillAlpha(0.5);
@@ -38,7 +37,7 @@ Renderer.prototype.render = function(cq) {
                , cq.canvas.height/2 - this.center.y * this.scale
                );
 
-    this.game.world.DrawDebugData();
+    game.world.DrawDebugData();
 
     cq.context.restore();
 }
