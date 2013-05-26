@@ -56,8 +56,9 @@ Game.prototype.step = function(keysPressed, mouse) {
     this.world.ClearForces();
 }
 
-Game.prototype.render = function(cq) {
+Game.prototype.render = function(cq, keysPressed, mouse) {
     this.camera.lookAt(this.you.GetPosition());
+    this.camera.translateScreen(new b2Vec2(mouse.x - cq.canvas.width/2, mouse.y - cq.canvas.height/2));
     this.camera.render(cq);
 }
 
@@ -78,6 +79,11 @@ Camera.prototype.lookAt = function(center) {
 }
 
 Camera.prototype.translate = function(delta) {
+    this.center.Add(delta);
+}
+
+Camera.prototype.translateScreen = function(delta) {
+    delta.Multiply(1 / this.scale);
     this.center.Add(delta);
 }
 
