@@ -18,7 +18,7 @@ Renderer.prototype.translate = function(delta) {
 Renderer.prototype.render = function(cq, keysPressed, mouse, game) {
     game.world.SetDebugDraw(this.debugDraw);
 
-    var scale = cq.width / this.viewportWidth;
+    var scale = cq.canvas.width / this.viewportWidth;
 
     /*
      * ===========translateScreen===========
