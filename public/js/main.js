@@ -18,7 +18,7 @@ var framework = {
     setup : function() {
         this.cq = cq().framework(this, this);
         this.cq.appendTo("body");
-        this.game = new Game();
+        this.game = new Game(20, 20, 1);
         this.renderer = new Renderer(20);
     },
 
