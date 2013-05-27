@@ -18,7 +18,9 @@ var framework = {
     setup : function() {
         this.cq = cq().framework(this, this);
         this.cq.appendTo("body");
-        this.game = new Game(20, 20, 1);
+        mouse.x = this.cq.canvas.width/2;
+        mouse.y = this.cq.canvas.height/2;
+        this.game = new Game(80, 20, 1);
         this.renderer = new Renderer(20);
     },
 
