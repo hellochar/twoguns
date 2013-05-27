@@ -19,7 +19,7 @@ var framework = {
         this.cq = cq().framework(this, this);
         this.cq.appendTo("body");
         this.game = new Game();
-        this.renderer = new Renderer();
+        this.renderer = new Renderer(20);
     },
 
     /* game logic loop */
