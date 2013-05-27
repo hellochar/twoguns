@@ -22,11 +22,22 @@ var framework = {
         mouse.y = this.cq.canvas.height/2;
         this.game = new Game(80, 20, 1);
         this.renderer = new Renderer(20);
+
+        this.stats = new Stats();
+        this.stats.setMode(0);
+
+        this.stats.domElement.style.position = 'absolute';
+        this.stats.domElement.style.left = '0px';
+        this.stats.domElement.style.top = '0px';
+
+        document.body.appendChild( this.stats.domElement );
     },
 
     /* game logic loop */
     onStep: function(delta, time) {
+        this.stats.begin();
         this.game.step(keysPressed, mouse);
+        this.stats.end();
     },
 
     /* rendering loop */

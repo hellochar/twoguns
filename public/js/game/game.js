@@ -43,14 +43,28 @@ function Game(width, height, gridSize) {
 
     //create you
     this.you = (function() {
+        var bodyDef = new b2BodyDef;
         bodyDef.type = b2Body.b2_dynamicBody;
+        bodyDef.position.Set(0, 0);
+        bodyDef.fixedRotation = true;
+
+        var body = world.CreateBody(bodyDef);
+
+        var fixDef = new b2FixtureDef;
+
+        // main body/torso
+        fixDef.density = 1.0;
+        fixDef.friction = 0.8;
+        fixDef.restitution = -10;
         fixDef.shape = new b2PolygonShape;
         fixDef.shape.SetAsBox( .2 / 2, 1.7 / 2 );
 
-        bodyDef.position.Set(0, 0);
-
-        var body = world.CreateBody(bodyDef);
         body.CreateFixture(fixDef);
+
+        // feet sensor
+        fixDef.isSensor = true;
+        fixDef.shape.SetAsEdge(new b2Vec2( -.2 / 2, 1.7 / 2), new b2Vec2( +.2 / 2, 1.7 / 2 ) );
+        body.feet = body.CreateFixture(fixDef);
 
         return body;
     })();
@@ -58,7 +72,8 @@ function Game(width, height, gridSize) {
     //create platform boxes
     bodyDef.position.Set(0, 0);
     bodyDef.type = b2Body.b2_staticBody;
-    var platformBody = world.CreateBody(bodyDef);
+    this.platformBody = world.CreateBody(bodyDef);
+    // platformBody.SetUserData({ class : 'platform' });
 
     this.noise = new ClassicalNoise();
 
@@ -84,6 +99,23 @@ function Game(width, height, gridSize) {
 
 Game.prototype.step = function(keysPressed, mouse) {
     //todo make player respond to input
-    this.world.Step(1 / 60, 10, 10);
+
+    // var canJump = (function() {
+    //     for(var ce = this.you.GetContactList(); ce; ce = ce.next) {
+    //         var c = ce.contact;
+    //         if(c.
+    //     }
+    // })();
+
+    if('w' in keysPressed) {
+        this.you.ApplyImpulse(new b2Vec2(0, -1), this.you.GetWorldCenter());
+    }
+    if('a' in keysPressed) {
+        this.you.ApplyImpulse(new b2Vec2(-1, 0), this.you.GetWorldCenter());
+    }
+    if('d' in keysPressed) {
+        this.you.ApplyImpulse(new b2Vec2(1, 0), this.you.GetWorldCenter());
+    }
+    this.world.Step(1 / 30, 10, 10);
     this.world.ClearForces();
 }
