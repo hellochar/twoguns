@@ -47,6 +47,7 @@ function Game(width, height, gridSize) {
         bodyDef.type = b2Body.b2_dynamicBody;
         bodyDef.position.Set(0, 0);
         // bodyDef.fixedRotation = true;
+        bodyDef.angularDamping = 5;
 
         var body = world.CreateBody(bodyDef);
 
@@ -77,7 +78,7 @@ function Game(width, height, gridSize) {
 
     this.noise = new ClassicalNoise();
 
-    this.generateNoiseBoxes(3);
+    this.generateNoiseBoxes(3, fixDef, bodyDef);
 
 }
 
@@ -88,13 +89,14 @@ function Game(width, height, gridSize) {
  *     after 2 the usual noisey-ness comes into play
  *
  */
-Game.prototype.generateNoiseBoxes = function(noiseScalar) {
-    for(var x = -width/2; x < width/2; x += gridSize) {
-        for(var y = -height/2; y < height/2; y += gridSize) {
+Game.prototype.generateNoiseBoxes = function(noiseScalar, fixDef, bodyDef) {
+    var gridSize = this.gridSize;
+    for(var x = -this.width/2; x < this.width/2; x += gridSize) {
+        for(var y = -this.height/2; y < this.height/2; y += gridSize) {
             if((this.noise.noise(x/noiseScalar, y/noiseScalar, 0) + 1) / 2 < .5) {
                 fixDef.shape.SetAsBox(gridSize / 2, gridSize / 2);
                 bodyDef.position.Set(x + gridSize / 2, y + gridSize / 2);
-                world.CreateBody(bodyDef).CreateFixture(fixDef);
+                this.world.CreateBody(bodyDef).CreateFixture(fixDef);
                 //query neighbors, create contacts
             }
         }
@@ -112,7 +114,7 @@ Game.prototype.step = function(keysPressed, mouse) {
     // })();
 
     var POWER = .3;
-    var loc = this.you.GetWorldPoint(new b2Vec2(0, .5));
+    var loc = this.you.GetWorldPoint(new b2Vec2(0, -.5));
     if('w' in keysPressed) {
         this.you.ApplyImpulse(new b2Vec2(0, -POWER), loc);
     }
