@@ -46,7 +46,7 @@ function Game(width, height, gridSize) {
         var bodyDef = new b2BodyDef;
         bodyDef.type = b2Body.b2_dynamicBody;
         bodyDef.position.Set(0, 0);
-        bodyDef.fixedRotation = true;
+        // bodyDef.fixedRotation = true;
 
         var body = world.CreateBody(bodyDef);
 
@@ -77,14 +77,18 @@ function Game(width, height, gridSize) {
 
     this.noise = new ClassicalNoise();
 
-    /*
-     * between 1 and 2 produces a dense maze-like structure (it seems that any 1 < n < 2 has the same characteristics)
-     * exactly 2 produces quite thin lines, somewhat sparse
-     * after 2 the usual noisey-ness comes into play
-     *
-     */
-    var noiseScalar = 3;
+    this.generateNoiseBoxes(3);
 
+}
+
+/*
+ * noiseScalar:
+ *     between 1 and 2 produces a dense maze-like structure (it seems that any 1 < n < 2 has the same characteristics)
+ *     exactly 2 produces quite thin lines, somewhat sparse
+ *     after 2 the usual noisey-ness comes into play
+ *
+ */
+Game.prototype.generateNoiseBoxes = function(noiseScalar) {
     for(var x = -width/2; x < width/2; x += gridSize) {
         for(var y = -height/2; y < height/2; y += gridSize) {
             if((this.noise.noise(x/noiseScalar, y/noiseScalar, 0) + 1) / 2 < .5) {
@@ -107,14 +111,19 @@ Game.prototype.step = function(keysPressed, mouse) {
     //     }
     // })();
 
+    var POWER = .3;
+    var loc = this.you.GetWorldPoint(new b2Vec2(0, .5));
     if('w' in keysPressed) {
-        this.you.ApplyImpulse(new b2Vec2(0, -1), this.you.GetWorldCenter());
+        this.you.ApplyImpulse(new b2Vec2(0, -POWER), loc);
     }
     if('a' in keysPressed) {
-        this.you.ApplyImpulse(new b2Vec2(-1, 0), this.you.GetWorldCenter());
+        this.you.ApplyImpulse(new b2Vec2(-POWER, 0), loc);
+    }
+    if('s' in keysPressed) {
+        this.you.ApplyImpulse(new b2Vec2(0, POWER), loc);
     }
     if('d' in keysPressed) {
-        this.you.ApplyImpulse(new b2Vec2(1, 0), this.you.GetWorldCenter());
+        this.you.ApplyImpulse(new b2Vec2(POWER, 0), loc);
     }
     this.world.Step(1 / 30, 10, 10);
     this.world.ClearForces();
