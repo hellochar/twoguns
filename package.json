@@ -1,0 +1,17 @@
+{
+  "name": "twoguns",
+  "version": "0.0.0",
+  "description": "Multiplayer shooting platformer with destructible terrain",
+  "main": "app.js",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/hellochar/twoguns.git"
+  },
+  "author": "Xiaohan Zhang <hellocharlien@hotmail.com>",
+  "devDependencies": {
+    "grunt": "~0.4.1",
+    "socket.io": "~0.9.16",
+    "grunt-contrib-coffee": "~0.7.0"
+  }
+}
