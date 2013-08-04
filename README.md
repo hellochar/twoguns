@@ -34,5 +34,11 @@ Multiplayer shooting platformer with destructible terrain
         - Move or jump method calls
         - Set looking
 
+### Supporting
+- Use requirejs on client-side
+- Write code in coffeescript and auto-compile to public/
+- Incremental updating (recompile coffee when it changes)
+- Auto-refreshing of page when coffee files change
+
 Contact: hellocharlien@hotmail.com
 
