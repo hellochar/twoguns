@@ -9,7 +9,7 @@ module.exports = function(grunt) {
                     expand: true,
                     cwd: 'coffee/',
                     src: ['**/*.coffee'],
-                    dest: 'out/',
+                    dest: 'compiled/js/',
                     ext: '.js',
                 }],
             },

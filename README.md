@@ -35,8 +35,8 @@ Multiplayer shooting platformer with destructible terrain
         - Set looking
 
 ### Supporting
-- Use requirejs on client-side
 - Write code in coffeescript and auto-compile to public/
+    (delete old .js files when their .coffee gets removed)
 - Incremental updating (recompile coffee when it changes)
 - Auto-refreshing of page when coffee files change
 

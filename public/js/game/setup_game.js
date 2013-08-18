@@ -1,4 +1,4 @@
-require(['socket.io', 'canvasquery', 'game/game', 'game/renderer'], function(io, cq, Game, Renderer) {
+require(['socket.io', 'canvasquery', 'game', 'renderer'], function(io, cq, Game, Renderer) {
 
     var socket = io.connect('http://localhost');
     socket.on('news', function (data) {
