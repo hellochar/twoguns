@@ -15,4 +15,3 @@ define ['box2d'], (Box2D) ->
   b2.MouseJointDef =  Box2D.Dynamics.Joints.b2MouseJointDef
 
   b2
-
