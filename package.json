@@ -12,6 +12,7 @@
   "devDependencies": {
     "grunt": "~0.4.1",
     "socket.io": "~0.9.16",
-    "grunt-contrib-coffee": "~0.7.0"
+    "grunt-contrib-coffee": "~0.7.0",
+    "grunt-contrib-watch": ~0.5.2
   }
 }

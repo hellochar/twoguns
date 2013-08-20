@@ -14,7 +14,14 @@ module.exports = function(grunt) {
                 }],
             },
         },
+        watch: {
+            scripts: {
+                files: ['**/*.coffee'],
+                tasks: ['coffee'],
+            },
+        },
     });
 
     grunt.loadNpmTasks('grunt-contrib-coffee');
+    grunt.loadNpmTasks('grunt-contrib-watch');
 }
