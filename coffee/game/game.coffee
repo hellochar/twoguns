@@ -88,8 +88,8 @@ define ['b2', 'noise', 'stats'], (b2, ClassicalNoise, Stats) ->
     #
     generateNoiseBoxes: (noiseScalar, fixDef, bodyDef) =>
       fixDef.shape.SetAsBox(@gridSize / 2, @gridSize / 2)
-      for x in [-@width/2..@width/2] by @gridSize
-        for y in [-@height/2..@height/2] by @gridSize
+      for x in [-@width/2...@width/2] by @gridSize
+        for y in [-@height/2...@height/2] by @gridSize
           if (@noise.noise(x/noiseScalar, y/noiseScalar, 0) + 1) / 2 < .5
             bodyDef.position.Set(x + @gridSize / 2, y + @gridSize / 2)
             @world.CreateBody(bodyDef).CreateFixture(fixDef)
