@@ -35,10 +35,12 @@ Multiplayer shooting platformer with destructible terrain
         - Set looking
 
 ### Supporting
-- Write code in coffeescript and auto-compile to public/
-    (delete old .js files when their .coffee gets removed)
-- Incremental updating (recompile coffee when it changes)
+- <s>Write code in coffeescript and auto-compile to public/</s>
+    - (delete old .js files when their .coffee gets removed)
+- <s>watched updating (recompile coffee automatically when it changes)</s>
+    - only recompile the file that was changed
 - Auto-refreshing of page when coffee files change
+- Generic task for development: start server, compile, watch
 
 Contact: hellocharlien@hotmail.com
 

@@ -3,6 +3,7 @@
 module.exports = function(grunt) {
 
     grunt.initConfig({
+        clean: ['compiled/js/'],
         coffee: {
             dynamic_mappings: {
                 files: [{
@@ -22,6 +23,9 @@ module.exports = function(grunt) {
         },
     });
 
+    grunt.loadNpmTasks('grunt-contrib-clean');
     grunt.loadNpmTasks('grunt-contrib-coffee');
     grunt.loadNpmTasks('grunt-contrib-watch');
+
+    grunt.registerTask('default', ['clean', 'coffee', 'watch']);
 }
