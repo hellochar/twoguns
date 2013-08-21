@@ -24,6 +24,7 @@ module.exports = function(grunt) {
                 files: 'coffee/**/*.coffee',
                 tasks: 'coffee:singleFile',
                 options: {
+                    livereload: true,
                     spawn: false,
                     event: ['added', 'changed'],
                 },
@@ -32,6 +33,7 @@ module.exports = function(grunt) {
                 files: 'coffee/**/*.coffee',
                 tasks: '',
                 options: {
+                    livereload: true,
                     spawn: false,
                     event: ['deleted'],
                 },
