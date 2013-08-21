@@ -1,4 +1,4 @@
-require ['socket.io', 'canvasquery', 'game', 'renderer'], (io, cq, Game, Renderer) ->
+require ['jquery', 'b2', 'socket.io', 'canvasquery', 'game/game', 'game/renderer'], ($, b2, io, cq, Game, Renderer) ->
 
   socket = io.connect('http://localhost')
   socket.on('news', (data) ->
@@ -23,7 +23,7 @@ require ['socket.io', 'canvasquery', 'game', 'renderer'], (io, cq, Game, Rendere
       mouse.x = @cq.canvas.width/2
       mouse.y = @cq.canvas.height/2
       @game = new Game(80, 20, 1)
-      @renderer = new Renderer(20)
+      @renderer = new Renderer(20, @cq)
 
       @stats = new Stats()
       @stats.setMode(0)
@@ -42,7 +42,7 @@ require ['socket.io', 'canvasquery', 'game', 'renderer'], (io, cq, Game, Rendere
 
     # rendering loop
     onRender: (delta, time) ->
-      @renderer.render(@cq, keysPressed, mouse, @game)
+      @renderer.render(keysPressed, mouse, @game)
 
     # window resize
     onResize: (width, height) ->
@@ -57,6 +57,7 @@ require ['socket.io', 'canvasquery', 'game', 'renderer'], (io, cq, Game, Rendere
       mouse.button = button
       mouse.x = x
       mouse.y = y
+      @game.mouseDown(@renderer.worldVec2(new b2.Vec2(x, y)), button)
     onMouseUp: (x, y, button) ->
       mouse.button = -1
       mouse.x = x

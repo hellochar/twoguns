@@ -1,4 +1,4 @@
-define ['b2', 'noise', 'stats'], (b2, ClassicalNoise, Stats) ->
+define ['jquery', 'underscore', 'b2', 'noise', 'stats', 'multi_contact_listener'], ($, _, b2, ClassicalNoise, Stats, MultiContactListener) ->
   # model of the game
   #
   #   there is a physics world, with objects etc.
@@ -12,6 +12,8 @@ define ['b2', 'noise', 'stats'], (b2, ClassicalNoise, Stats) ->
         new b2.Vec2(0, 10)  # gravity
         ,  true         # allow sleep
         )
+
+      new MultiContactListener(world)
 
       fixDef = new b2.FixtureDef
       fixDef.density = 1.0
@@ -51,12 +53,15 @@ define ['b2', 'noise', 'stats'], (b2, ClassicalNoise, Stats) ->
       @noise = new ClassicalNoise()
       @generateNoiseBoxes(3, fixDef, bodyDef)
 
+      #array of b2.Body's that are my bullets
+      @bullets = []
+      @toDestroy = []
+
     makePlayerCharacter: () =>
       bodyDef = new b2.BodyDef
       bodyDef.type = b2.Body.b2_dynamicBody
       bodyDef.position.Set(0, 0)
-      #  bodyDef.fixedRotation = true
-      bodyDef.angularDamping = 5
+      bodyDef.fixedRotation = true
 
       body = @world.CreateBody(bodyDef)
 
@@ -104,7 +109,7 @@ define ['b2', 'noise', 'stats'], (b2, ClassicalNoise, Stats) ->
       #    }
       #  })()
       POWER = .3
-      loc = @you.GetWorldPoint(new b2.Vec2(0, -.5))
+      loc = @you.GetWorldPoint(new b2.Vec2(0, 0))
       if 'w' of keysPressed
         @you.ApplyImpulse(new b2.Vec2(0, -POWER), loc)
 
@@ -117,8 +122,54 @@ define ['b2', 'noise', 'stats'], (b2, ClassicalNoise, Stats) ->
       if 'd' of keysPressed
         @you.ApplyImpulse(new b2.Vec2(POWER, 0), loc)
 
+      @world.DestroyBody(body) for body in @toDestroy
+      @toDestroy = []
+
       @world.Step(1 / 30, 10, 10)
       @world.ClearForces()
+
+    mouseDown: (location, button) =>
+      offset = new b2.Vec2()
+      offset.SetV(location)
+      offset.Subtract(@you.GetWorldCenter())
+
+
+      bodyDef = new b2.BodyDef()
+      bodyDef.type = b2.Body.b2_dynamicBody
+      bodyDef.bullet = true
+
+      bodyDef.position.SetV(@you.GetWorldCenter())
+      positionOffset = offset.Copy()
+      DISTANCE_OFFSET = .2
+      positionOffset.Multiply(DISTANCE_OFFSET / positionOffset.Length())
+      bodyDef.position.Add(positionOffset)
+
+      BULLET_SPEED = 10
+      bodyDef.linearVelocity.SetV(offset)
+      bodyDef.linearVelocity.Multiply(BULLET_SPEED / bodyDef.linearVelocity.Length())
+
+      body = @world.CreateBody(bodyDef)
+
+      fixDef = new b2.FixtureDef()
+      fixDef.density = 0.0
+      fixDef.friction = 0.0
+      fixDef.restitution = 0.2
+      fixDef.shape = new b2.CircleShape(.05)
+
+      body.CreateFixture(fixDef)
+
+      $(body).on("begincontact", (evt, contact, myFixture, otherFixture) =>
+        if contact.IsTouching() and otherFixture.GetBody() isnt @you
+          @toDestroy.push(body)
+          @toDestroy.push(otherFixture.GetBody())
+          @bullets = _.without(@bullets, body)
+          $(body).off("begincontact")
+      )
+
+      @bullets.push(body)
+
+
+
 
 
   return Game
