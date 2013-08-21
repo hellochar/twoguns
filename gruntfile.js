@@ -45,6 +45,13 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-coffee');
     grunt.loadNpmTasks('grunt-contrib-watch');
 
+    grunt.registerTask('server', function () {
+        grunt.util.spawn({
+            cmd: 'nodemon',
+            args: ['app.js'],
+        });
+    });
+
     grunt.event.on('watch', function(action, filepath) {
 
         var js_filepath = filepath.replace(/coffee\/(.*)\.coffee/, "compiled/js/$1.js");
@@ -58,5 +65,5 @@ module.exports = function(grunt) {
         }
     });
 
-    grunt.registerTask('default', ['clean', 'coffee:all', 'watch']);
+    grunt.registerTask('default', ['clean', 'coffee:all', 'server', 'watch']);
 }
