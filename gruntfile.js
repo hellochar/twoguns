@@ -5,20 +5,36 @@ module.exports = function(grunt) {
     grunt.initConfig({
         clean: ['compiled/js/'],
         coffee: {
-            dynamic_mappings: {
+            all: {
                 files: [{
                     expand: true,
                     cwd: 'coffee/',
-                    src: ['**/*.coffee'],
+                    src: '**/*.coffee',
                     dest: 'compiled/js/',
                     ext: '.js',
                 }],
             },
+            singleFile: {
+                src: '',
+                dest: '',
+            },
         },
         watch: {
-            scripts: {
-                files: ['**/*.coffee'],
-                tasks: ['coffee'],
+            coffee_changed: {
+                files: 'coffee/**/*.coffee',
+                tasks: 'coffee:singleFile',
+                options: {
+                    spawn: false,
+                    event: ['added', 'changed'],
+                },
+            },
+            coffee_deleted: {
+                files: 'coffee/**/*.coffee',
+                tasks: '',
+                options: {
+                    spawn: false,
+                    event: ['deleted'],
+                },
             },
         },
     });
@@ -27,5 +43,18 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-coffee');
     grunt.loadNpmTasks('grunt-contrib-watch');
 
-    grunt.registerTask('default', ['clean', 'coffee', 'watch']);
+    grunt.event.on('watch', function(action, filepath) {
+
+        var js_filepath = filepath.replace(/coffee\/(.*)\.coffee/, "compiled/js/$1.js");
+
+        if(action == 'deleted') {
+            console.log("deleting", js_filepath);
+            grunt.file.delete(js_filepath);
+        } else {
+            grunt.config(['coffee', 'singleFile', 'src'], filepath);
+            grunt.config(['coffee', 'singleFile', 'dest'], js_filepath);
+        }
+    });
+
+    grunt.registerTask('default', ['clean', 'coffee:all', 'watch']);
 }

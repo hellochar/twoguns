@@ -36,9 +36,9 @@ Multiplayer shooting platformer with destructible terrain
 
 ### Supporting
 - <s>Write code in coffeescript and auto-compile to public/</s>
-    - (delete old .js files when their .coffee gets removed)
+    - <s>(delete old .js files when their .coffee gets removed)</s>
 - <s>watched updating (recompile coffee automatically when it changes)</s>
-    - only recompile the file that was changed
+    - <s>only recompile the file that was changed</s>
 - Auto-refreshing of page when coffee files change
 - Generic task for development: start server, compile, watch
 
