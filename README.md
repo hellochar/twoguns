@@ -40,7 +40,8 @@ Multiplayer shooting platformer with destructible terrain
 - <s>watched updating (recompile coffee automatically when it changes)</s>
     - <s>only recompile the file that was changed</s>
 - <s>Auto-refreshing of page when coffee files change</s>
-- Generic task for development: start server, compile, watch
+- <s>Generic task for development: start server, compile, watch</s>
+    - (this is the default task)
 
 Contact: hellocharlien@hotmail.com
 

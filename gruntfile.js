@@ -39,18 +39,24 @@ module.exports = function(grunt) {
                 },
             },
         },
+        nodemon: {
+            dev: {},
+        },
+        concurrent: {
+            dev: {
+                tasks: ['nodemon:dev', 'watch'],
+                options: {
+                    logConcurrentOutput: true,
+                },
+            },
+        },
     });
 
     grunt.loadNpmTasks('grunt-contrib-clean');
     grunt.loadNpmTasks('grunt-contrib-coffee');
     grunt.loadNpmTasks('grunt-contrib-watch');
-
-    grunt.registerTask('server', function () {
-        grunt.util.spawn({
-            cmd: 'nodemon',
-            args: ['app.js'],
-        });
-    });
+    grunt.loadNpmTasks('grunt-concurrent');
+    grunt.loadNpmTasks('grunt-nodemon');
 
     grunt.event.on('watch', function(action, filepath) {
 
@@ -65,5 +71,5 @@ module.exports = function(grunt) {
         }
     });
 
-    grunt.registerTask('default', ['clean', 'coffee:all', 'server', 'watch']);
+    grunt.registerTask('default', ['clean', 'coffee:all', 'concurrent:dev']);
 }
