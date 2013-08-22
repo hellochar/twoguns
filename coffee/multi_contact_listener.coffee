@@ -1,4 +1,4 @@
-define ['jquery'], ($) ->
+define ['jquery', 'box2d'], ($, Box2D) ->
   class MultiContactListener extends Box2D.Dynamics.b2ContactListener
     constructor: (@world) ->
       world.SetContactListener(this)

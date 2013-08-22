@@ -57,7 +57,7 @@ define ['jquery', 'underscore', 'b2', 'noise', 'stats', 'multi_contact_listener'
       @bullets = []
       @toDestroy = []
 
-    makePlayerCharacter: () =>
+    makePlayerCharacter: (height = 1.7) =>
       bodyDef = new b2.BodyDef
       bodyDef.type = b2.Body.b2_dynamicBody
       bodyDef.position.Set(0, 0)
@@ -72,13 +72,13 @@ define ['jquery', 'underscore', 'b2', 'noise', 'stats', 'multi_contact_listener'
       fixDef.friction = 0.8
       fixDef.restitution = -10
       fixDef.shape = new b2.PolygonShape
-      fixDef.shape.SetAsBox( .2 / 2, 1.7 / 2 )
+      fixDef.shape.SetAsBox( .2 / 2, height / 2 )
 
       body.CreateFixture(fixDef)
 
       #  feet sensor
       fixDef.isSensor = true
-      fixDef.shape.SetAsEdge(new b2.Vec2( -.2 / 2, 1.7 / 2), new b2.Vec2( +.2 / 2, 1.7 / 2 ) )
+      fixDef.shape.SetAsEdge(new b2.Vec2( -.2 / 2, height / 2), new b2.Vec2( +.2 / 2, height / 2 ) )
       body.feet = body.CreateFixture(fixDef)
 
       body
