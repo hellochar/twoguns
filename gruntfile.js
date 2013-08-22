@@ -3,6 +3,7 @@
 module.exports = function(grunt) {
 
     grunt.initConfig({
+        pkg: grunt.file.readJSON('package.json'),
         clean: ['compiled/js/'],
         coffee: {
             all: {
@@ -40,7 +41,11 @@ module.exports = function(grunt) {
             },
         },
         nodemon: {
-            dev: {},
+            dev: {
+                options: {
+                    watchedFolders: ['<%= pkg.main %>'],
+                },
+            },
         },
         concurrent: {
             dev: {
