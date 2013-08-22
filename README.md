@@ -42,6 +42,8 @@ Multiplayer shooting platformer with destructible terrain
 - <s>Auto-refreshing of page when coffee files change</s>
 - <s>Generic task for development: start server, compile, watch</s>
     - (this is the default task)
+- Reload on requireConfig change
+- reload when app.js changes
 
 Contact: hellocharlien@hotmail.com
 
