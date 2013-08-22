@@ -34,6 +34,9 @@ Multiplayer shooting platformer with destructible terrain
         - Move or jump method calls
         - Set looking
 
+## bugs
+- bullets shouldn't obey gravity
+
 ### Supporting
 - <s>Write code in coffeescript and auto-compile to public/</s>
     - <s>(delete old .js files when their .coffee gets removed)</s>

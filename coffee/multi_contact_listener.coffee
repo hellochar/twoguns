@@ -3,13 +3,16 @@ define ['jquery', 'box2d'], ($, Box2D) ->
     constructor: (@world) ->
       world.SetContactListener(this)
 
-    BeginContact: (contact) =>
-      $(@world).trigger("begincontact", contact)
-      $(contact.GetFixtureA().GetBody()).trigger("begincontact", [contact, contact.GetFixtureA(), contact.GetFixtureB()])
-      $(contact.GetFixtureB().GetBody()).trigger("begincontact", [contact, contact.GetFixtureB(), contact.GetFixtureA()])
+      for box2dName in ["BeginContact", "EndContact"]
+        eventName = box2dName.toLowerCase()
+        do (eventName) =>
+          this[box2dName] = (contact) =>
+            $(@world).trigger(eventName, contact)
+            $(contact.GetFixtureA().GetBody()).trigger(eventName, [contact, contact.GetFixtureA(), contact.GetFixtureB()])
+            $(contact.GetFixtureB().GetBody()).trigger(eventName, [contact, contact.GetFixtureB(), contact.GetFixtureA()])
 
-    EndContact: (contact) =>
-      $(@world).trigger("endcontact", contact)
+            $(contact.GetFixtureA()).trigger(eventName, [contact, contact.GetFixtureA(), contact.GetFixtureB()])
+            $(contact.GetFixtureB()).trigger(eventName, [contact, contact.GetFixtureB(), contact.GetFixtureA()])
 
     PreSolve: (contact, oldManifold) =>
       $(@world).trigger("presolve", contact, oldManifold)

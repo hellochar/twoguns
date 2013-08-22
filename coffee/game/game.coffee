@@ -13,12 +13,12 @@ define ['jquery', 'underscore', 'b2', 'noise', 'stats', 'multi_contact_listener'
         ,  true         # allow sleep
         )
 
-      new MultiContactListener(world)
+      window.mcl = new MultiContactListener(world)
 
       fixDef = new b2.FixtureDef
       fixDef.density = 1.0
       fixDef.friction = 0.5
-      fixDef.restitution = 0.2
+      fixDef.restitution = 0
 
       bodyDef = new b2.BodyDef
 
@@ -57,7 +57,7 @@ define ['jquery', 'underscore', 'b2', 'noise', 'stats', 'multi_contact_listener'
       @bullets = []
       @toDestroy = []
 
-    makePlayerCharacter: (height = 1.7) =>
+    makePlayerCharacter: (height = 1.7, width = 0.2) =>
       bodyDef = new b2.BodyDef
       bodyDef.type = b2.Body.b2_dynamicBody
       bodyDef.position.Set(0, 0)
@@ -70,16 +70,24 @@ define ['jquery', 'underscore', 'b2', 'noise', 'stats', 'multi_contact_listener'
       #  main body/torso
       fixDef.density = 1.0
       fixDef.friction = 0.8
-      fixDef.restitution = -10
+      fixDef.restitution = 0
       fixDef.shape = new b2.PolygonShape
-      fixDef.shape.SetAsBox( .2 / 2, height / 2 )
+      fixDef.shape.SetAsBox( width / 2, height / 2 )
 
-      body.CreateFixture(fixDef)
+      body.torso = body.CreateFixture(fixDef)
 
       #  feet sensor
+      FEET_PADDING_BOTTOM = 0.01
       fixDef.isSensor = true
-      fixDef.shape.SetAsEdge(new b2.Vec2( -.2 / 2, height / 2), new b2.Vec2( +.2 / 2, height / 2 ) )
+      fixDef.shape.SetAsEdge(new b2.Vec2( - width / 2.1, height / 2 + FEET_PADDING_BOTTOM), new b2.Vec2( +width / 2.1, height / 2 + FEET_PADDING_BOTTOM ) )
       body.feet = body.CreateFixture(fixDef)
+
+      $(body.feet).on("begincontact", (evt, contact, myFixture, otherFixture) =>
+        @canJump = true
+      )
+      $(body.feet).on("endcontact", (evt, contact, myFixture, otherFixture) =>
+        @canJump = false
+      )
 
       body
 
@@ -101,26 +109,22 @@ define ['jquery', 'underscore', 'b2', 'noise', 'stats', 'multi_contact_listener'
             # query neighbors, create contacts
 
     step: (keysPressed, mouse) =>
-      # todo make player respond to input
-      #  canJump = (function() {
-      #    for(ce = @you.GetContactList() ce ce = ce.next) {
-      #      c = ce.contact
-      #      if(c.
-      #    }
-      #  })()
+
       POWER = .3
       loc = @you.GetWorldPoint(new b2.Vec2(0, 0))
-      if 'w' of keysPressed
-        @you.ApplyImpulse(new b2.Vec2(0, -POWER), loc)
+      if @canJump
+        if 'w' of keysPressed
+          @you.ApplyImpulse(new b2.Vec2(0, -POWER * 4), loc)
 
       if 'a' of keysPressed
         @you.ApplyImpulse(new b2.Vec2(-POWER, 0), loc)
 
+      if 'd' of keysPressed
+        @you.ApplyImpulse(new b2.Vec2(POWER, 0), loc)
+
       if 's' of keysPressed
         @you.ApplyImpulse(new b2.Vec2(0, POWER), loc)
 
-      if 'd' of keysPressed
-        @you.ApplyImpulse(new b2.Vec2(POWER, 0), loc)
 
       @world.DestroyBody(body) for body in @toDestroy
       @toDestroy = []
@@ -153,7 +157,7 @@ define ['jquery', 'underscore', 'b2', 'noise', 'stats', 'multi_contact_listener'
       fixDef = new b2.FixtureDef()
       fixDef.density = 0.0
       fixDef.friction = 0.0
-      fixDef.restitution = 0.2
+      fixDef.restitution = 0
       fixDef.shape = new b2.CircleShape(.05)
 
       body.CreateFixture(fixDef)
