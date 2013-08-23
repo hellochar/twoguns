@@ -118,14 +118,15 @@ define ['jquery', 'underscore', 'b2', 'noise', 'stats', 'multi_contact_listener'
 
     step: (keysPressed, mouse, delta) =>
       FORCE_JUMP = 0.8
-      FORCE_WALK = 3.5
+      FORCE_WALK = 4.0
+      FORCE_FLY = 0.05
       loc = @you.GetWorldPoint(new b2.Vec2(0, 0))
 
       if 'w' of keysPressed and @canJump > 0
         @you.ApplyImpulse(new b2.Vec2(0, -FORCE_JUMP), loc)
 
       if 'space' of keysPressed
-        @you.ApplyImpulse(new b2.Vec2(0, -.1), loc)
+        @you.ApplyImpulse(new b2.Vec2(0, -FORCE_FLY), loc)
 
       vel = @you.GetLinearVelocity()
 
