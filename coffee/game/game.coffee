@@ -7,6 +7,16 @@ define ['jquery', 'underscore', 'b2', 'noise', 'stats', 'multi_contact_listener'
   #   there is a win/lose condition
 
   class Game
+
+    BLOCK_BODYDEF = new b2.BodyDef
+    BLOCK_BODYDEF.type = b2.Body.b2_staticBody
+
+    BLOCK_FIXDEF = new b2.FixtureDef
+    BLOCK_FIXDEF.density = 1
+    BLOCK_FIXDEF.friction = 1
+    BLOCK_FIXDEF.restitution = 0
+    BLOCK_FIXDEF.shape = new b2.PolygonShape
+
     constructor: (@width, @height, @gridSize) ->
       world = @world = new b2.World(
         new b2.Vec2(0, 8)  # gravity
@@ -15,48 +25,31 @@ define ['jquery', 'underscore', 'b2', 'noise', 'stats', 'multi_contact_listener'
 
       window.mcl = new MultiContactListener(world)
 
-      fixDef = new b2.FixtureDef
-      fixDef.density = 1.0
-      fixDef.friction = 1
-      fixDef.restitution = 0
-
-      bodyDef = new b2.BodyDef
-
-
-      # create bounding box
-      bodyDef.type = b2.Body.b2_staticBody
-      fixDef.shape = new b2.PolygonShape
-
       # create top/bottom
-      fixDef.shape.SetAsBox(width/2, 1)
-      bodyDef.position.Set(0, -( height/2 + 1 ) )
-      world.CreateBody(bodyDef).CreateFixture(fixDef)
-      bodyDef.position.Set(0, +( height/2 + 1 ) )
-      world.CreateBody(bodyDef).CreateFixture(fixDef)
+      BLOCK_FIXDEF.shape.SetAsBox(width/2, 1)
+      BLOCK_BODYDEF.position.Set(0, -( height/2 + 1 ) )
+      world.CreateBody(BLOCK_BODYDEF).CreateFixture(BLOCK_FIXDEF)
+      BLOCK_BODYDEF.position.Set(0, +( height/2 + 1 ) )
+      world.CreateBody(BLOCK_BODYDEF).CreateFixture(BLOCK_FIXDEF)
 
       # create left/right
-      fixDef.shape.SetAsBox(1, height/2)
-      bodyDef.position.Set(-( width/2 + 1 ), 0)
-      world.CreateBody(bodyDef).CreateFixture(fixDef)
-      bodyDef.position.Set(+( width/2 + 1 ), 0)
-      world.CreateBody(bodyDef).CreateFixture(fixDef)
+      BLOCK_FIXDEF.shape.SetAsBox(1, height/2)
+      BLOCK_BODYDEF.position.Set(-( width/2 + 1 ), 0)
+      world.CreateBody(BLOCK_BODYDEF).CreateFixture(BLOCK_FIXDEF)
+      BLOCK_BODYDEF.position.Set(+( width/2 + 1 ), 0)
+      world.CreateBody(BLOCK_BODYDEF).CreateFixture(BLOCK_FIXDEF)
 
       # create you
       @you = @makePlayerCharacter()
 
       # create platform boxes
-      bodyDef.position.Set(0, 0)
-      bodyDef.type = b2.Body.b2_staticBody
-      @platformBody = world.CreateBody(bodyDef)
-      # platformBody.SetUserData({ class : 'platform' })
-
-      bodyDef.userData = 'block'
       @noise = new ClassicalNoise()
-      @generateNoiseBoxes(3, fixDef, bodyDef)
+      @generateNoiseBoxes(3)
 
       #array of b2.Body's that are my bullets
       @bullets = []
-      @toDestroy = []
+
+      @delegates = []
 
     makePlayerCharacter: (height = 1.3, width = 0.2) =>
       bodyDef = new b2.BodyDef
@@ -107,14 +100,20 @@ define ['jquery', 'underscore', 'b2', 'noise', 'stats', 'multi_contact_listener'
     #   after 2 the usual noisey-ness comes into play
     #
     #
-    generateNoiseBoxes: (noiseScalar, fixDef, bodyDef) =>
-      fixDef.shape.SetAsBox(@gridSize / 2, @gridSize / 2)
+    generateNoiseBoxes: (noiseScalar) =>
+      BLOCK_FIXDEF.shape.SetAsBox(@gridSize / 2, @gridSize / 2)
       for x in [-@width/2...@width/2] by @gridSize
         for y in [-@height/2...@height/2] by @gridSize
           if (@noise.noise(x/noiseScalar, y/noiseScalar, 0) + 1) / 2 < .5
-            bodyDef.position.Set(x + @gridSize / 2, y + @gridSize / 2)
-            @world.CreateBody(bodyDef).CreateFixture(fixDef)
+            @createBlock(x, y)
             # query neighbors, create contacts
+
+    createBlock: (x, y) =>
+      BLOCK_BODYDEF.position.Set(x + @gridSize / 2, y + @gridSize / 2)
+      block = @world.CreateBody(BLOCK_BODYDEF)
+      fixture = block.CreateFixture(BLOCK_FIXDEF)
+      block.SetUserData("block")
+
 
     step: (keysPressed, mouse, delta) =>
       FORCE_JUMP = 0.8
@@ -145,8 +144,8 @@ define ['jquery', 'underscore', 'b2', 'noise', 'stats', 'multi_contact_listener'
         @you.ApplyImpulse(new b2.Vec2(0, FORCE_JUMP / 10), loc)
 
 
-      @world.DestroyBody(body) for body in @toDestroy
-      @toDestroy = []
+      method() for method in @delegates
+      @delegates = []
 
       @world.Step(delta / 1000, 10, 10)
       @world.ClearForces()
@@ -184,8 +183,14 @@ define ['jquery', 'underscore', 'b2', 'noise', 'stats', 'multi_contact_listener'
 
       $(body).on("begincontact", (evt, contact, myFixture, otherFixture) =>
         if contact.IsTouching() and otherFixture.GetBody().GetUserData() is "block"
-          @toDestroy.push(body)
-          @toDestroy.push(otherFixture.GetBody())
+          @delegates.push(=>@world.DestroyBody(body))
+          if button is 0
+            @delegates.push(=>@world.DestroyBody(otherFixture.GetBody()))
+          else if button is 2
+            @delegates.push(=>
+              @createBlock(body.GetWorldCenter().x, body.GetWorldCenter().y)
+            )
+
           @bullets = _.without(@bullets, body)
           $(body).off("begincontact")
       )
