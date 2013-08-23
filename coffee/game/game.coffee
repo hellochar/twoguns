@@ -9,7 +9,7 @@ define ['jquery', 'underscore', 'b2', 'noise', 'stats', 'multi_contact_listener'
   class Game
     constructor: (@width, @height, @gridSize) ->
       world = @world = new b2.World(
-        new b2.Vec2(0, 10)  # gravity
+        new b2.Vec2(0, 8)  # gravity
         ,  true         # allow sleep
         )
 
@@ -58,11 +58,12 @@ define ['jquery', 'underscore', 'b2', 'noise', 'stats', 'multi_contact_listener'
       @bullets = []
       @toDestroy = []
 
-    makePlayerCharacter: (height = 1.7, width = 0.2) =>
+    makePlayerCharacter: (height = 1.3, width = 0.2) =>
       bodyDef = new b2.BodyDef
       bodyDef.type = b2.Body.b2_dynamicBody
       bodyDef.position.Set(0, 0)
       bodyDef.fixedRotation = true
+      bodyDef.allowSleep = false
 
       body = @world.CreateBody(bodyDef)
 
@@ -85,7 +86,7 @@ define ['jquery', 'underscore', 'b2', 'noise', 'stats', 'multi_contact_listener'
         new b2.Vec2(-FEET_WIDTH, height / 2 + FEET_HEIGHT),
         new b2.Vec2(-FEET_WIDTH, height / 2)
       ])
-      fixDef.friction = .8
+      fixDef.friction = 0
       body.feet = body.CreateFixture(fixDef)
 
       @canJump = 0
@@ -116,29 +117,37 @@ define ['jquery', 'underscore', 'b2', 'noise', 'stats', 'multi_contact_listener'
             # query neighbors, create contacts
 
     step: (keysPressed, mouse, delta) =>
-      FORCE_JUMP = 1.2
-      FORCE_WALK = 0.3
+      FORCE_JUMP = 0.8
+      FORCE_WALK = 3.5
       loc = @you.GetWorldPoint(new b2.Vec2(0, 0))
 
       if 'w' of keysPressed and @canJump > 0
         @you.ApplyImpulse(new b2.Vec2(0, -FORCE_JUMP), loc)
 
-      velX = @you.GetLinearVelocity().x
+      if 'space' of keysPressed
+        @you.ApplyImpulse(new b2.Vec2(0, -.1), loc)
+
+      vel = @you.GetLinearVelocity()
 
       if 'a' of keysPressed
-        @you.ApplyImpulse(new b2.Vec2(-FORCE_WALK, 0), loc)
-
-      if 'd' of keysPressed
-        @you.ApplyImpulse(new b2.Vec2(FORCE_WALK, 0), loc)
+        # force = Math.min(Math.max(-FORCE_WALK, -FORCE_WALK - vel.x), 0)
+        # @you.ApplyImpulse(new b2.Vec2(force, 0), loc)
+        @you.SetLinearVelocity(new b2.Vec2(-FORCE_WALK, vel.y))
+      else if 'd' of keysPressed
+        # force = Math.max(Math.min(FORCE_WALK, FORCE_WALK - vel.x), 0)
+        # @you.ApplyImpulse(new b2.Vec2(force, 0), loc)
+        @you.SetLinearVelocity(new b2.Vec2(FORCE_WALK, vel.y))
+      else
+        @you.SetLinearVelocity(new b2.Vec2(0, vel.y))
 
       if 's' of keysPressed
-        @you.ApplyImpulse(new b2.Vec2(0, FORCE_WALK), loc)
+        @you.ApplyImpulse(new b2.Vec2(0, FORCE_JUMP / 10), loc)
 
 
       @world.DestroyBody(body) for body in @toDestroy
       @toDestroy = []
 
-      @world.Step(delta / 1000 * 2, 10, 10)
+      @world.Step(delta / 1000, 10, 10)
       @world.ClearForces()
 
     mouseDown: (location, button) =>
@@ -160,6 +169,7 @@ define ['jquery', 'underscore', 'b2', 'noise', 'stats', 'multi_contact_listener'
       BULLET_SPEED = 10
       bodyDef.linearVelocity.SetV(offset)
       bodyDef.linearVelocity.Multiply(BULLET_SPEED / bodyDef.linearVelocity.Length())
+      bodyDef.linearVelocity.Add(@you.GetLinearVelocity())
 
       body = @world.CreateBody(bodyDef)
 
