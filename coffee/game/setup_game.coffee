@@ -37,7 +37,7 @@ require ['jquery', 'b2', 'socket.io', 'canvasquery', 'game/game', 'game/renderer
     # game logic loop
     onStep: (delta, time) ->
       @stats.begin()
-      @game.step(keysPressed, mouse)
+      @game.step(keysPressed, mouse, delta)
       @stats.end()
 
     # rendering loop
@@ -49,8 +49,8 @@ require ['jquery', 'b2', 'socket.io', 'canvasquery', 'game/game', 'game/renderer
       # resize canvas with window
       # change camera transform
       if @cq
-        @cq.canvas.width = width
         @cq.canvas.height = height
+        @cq.canvas.width = width
 
     # mouse and touch events
     onMouseDown: (x, y, button) ->

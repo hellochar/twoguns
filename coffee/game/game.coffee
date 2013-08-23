@@ -17,7 +17,7 @@ define ['jquery', 'underscore', 'b2', 'noise', 'stats', 'multi_contact_listener'
 
       fixDef = new b2.FixtureDef
       fixDef.density = 1.0
-      fixDef.friction = 0.5
+      fixDef.friction = 1
       fixDef.restitution = 0
 
       bodyDef = new b2.BodyDef
@@ -50,6 +50,7 @@ define ['jquery', 'underscore', 'b2', 'noise', 'stats', 'multi_contact_listener'
       @platformBody = world.CreateBody(bodyDef)
       # platformBody.SetUserData({ class : 'platform' })
 
+      bodyDef.userData = 'block'
       @noise = new ClassicalNoise()
       @generateNoiseBoxes(3, fixDef, bodyDef)
 
@@ -69,24 +70,30 @@ define ['jquery', 'underscore', 'b2', 'noise', 'stats', 'multi_contact_listener'
 
       #  main body/torso
       fixDef.density = 1.0
-      fixDef.friction = 0.8
+      fixDef.friction = 0
       fixDef.restitution = 0
       fixDef.shape = new b2.PolygonShape
       fixDef.shape.SetAsBox( width / 2, height / 2 )
 
       body.torso = body.CreateFixture(fixDef)
 
-      #  feet sensor
-      FEET_PADDING_BOTTOM = 0.01
-      fixDef.isSensor = true
-      fixDef.shape.SetAsEdge(new b2.Vec2( - width / 2.1, height / 2 + FEET_PADDING_BOTTOM), new b2.Vec2( +width / 2.1, height / 2 + FEET_PADDING_BOTTOM ) )
+      FEET_HEIGHT = 0.01
+      FEET_WIDTH = width / 2 - .01
+      fixDef.shape.SetAsVector([
+        new b2.Vec2(FEET_WIDTH, height / 2),
+        new b2.Vec2(FEET_WIDTH, height / 2 + FEET_HEIGHT),
+        new b2.Vec2(-FEET_WIDTH, height / 2 + FEET_HEIGHT),
+        new b2.Vec2(-FEET_WIDTH, height / 2)
+      ])
+      fixDef.friction = .8
       body.feet = body.CreateFixture(fixDef)
 
+      @canJump = 0
       $(body.feet).on("begincontact", (evt, contact, myFixture, otherFixture) =>
-        @canJump = true
+        @canJump += 1
       )
       $(body.feet).on("endcontact", (evt, contact, myFixture, otherFixture) =>
-        @canJump = false
+        @canJump -= 1
       )
 
       body
@@ -108,28 +115,30 @@ define ['jquery', 'underscore', 'b2', 'noise', 'stats', 'multi_contact_listener'
             @world.CreateBody(bodyDef).CreateFixture(fixDef)
             # query neighbors, create contacts
 
-    step: (keysPressed, mouse) =>
-
-      POWER = .3
+    step: (keysPressed, mouse, delta) =>
+      FORCE_JUMP = 1.2
+      FORCE_WALK = 0.3
       loc = @you.GetWorldPoint(new b2.Vec2(0, 0))
-      if @canJump
-        if 'w' of keysPressed
-          @you.ApplyImpulse(new b2.Vec2(0, -POWER * 4), loc)
+
+      if 'w' of keysPressed and @canJump > 0
+        @you.ApplyImpulse(new b2.Vec2(0, -FORCE_JUMP), loc)
+
+      velX = @you.GetLinearVelocity().x
 
       if 'a' of keysPressed
-        @you.ApplyImpulse(new b2.Vec2(-POWER, 0), loc)
+        @you.ApplyImpulse(new b2.Vec2(-FORCE_WALK, 0), loc)
 
       if 'd' of keysPressed
-        @you.ApplyImpulse(new b2.Vec2(POWER, 0), loc)
+        @you.ApplyImpulse(new b2.Vec2(FORCE_WALK, 0), loc)
 
       if 's' of keysPressed
-        @you.ApplyImpulse(new b2.Vec2(0, POWER), loc)
+        @you.ApplyImpulse(new b2.Vec2(0, FORCE_WALK), loc)
 
 
       @world.DestroyBody(body) for body in @toDestroy
       @toDestroy = []
 
-      @world.Step(1 / 30, 10, 10)
+      @world.Step(delta / 1000 * 2, 10, 10)
       @world.ClearForces()
 
     mouseDown: (location, button) =>
@@ -163,7 +172,7 @@ define ['jquery', 'underscore', 'b2', 'noise', 'stats', 'multi_contact_listener'
       body.CreateFixture(fixDef)
 
       $(body).on("begincontact", (evt, contact, myFixture, otherFixture) =>
-        if contact.IsTouching() and otherFixture.GetBody() isnt @you
+        if contact.IsTouching() and otherFixture.GetBody().GetUserData() is "block"
           @toDestroy.push(body)
           @toDestroy.push(otherFixture.GetBody())
           @bullets = _.without(@bullets, body)
