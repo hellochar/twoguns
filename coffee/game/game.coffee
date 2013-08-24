@@ -105,11 +105,13 @@ define ['jquery', 'underscore', 'b2', 'noise', 'stats', 'multi_contact_listener'
       for x in [-@width/2...@width/2] by @gridSize
         for y in [-@height/2...@height/2] by @gridSize
           if (@noise.noise(x/noiseScalar, y/noiseScalar, 0) + 1) / 2 < .5
-            @createBlock(x, y)
+            @createBlock(x + @gridSize / 2, y + @gridSize / 2)
             # query neighbors, create contacts
 
-    createBlock: (x, y) =>
-      BLOCK_BODYDEF.position.Set(x + @gridSize / 2, y + @gridSize / 2)
+    createBlock: (x, y, isStatic) =>
+      isStatic ?= true
+      BLOCK_BODYDEF.type = if isStatic then b2.Body.b2_staticBody else b2.Body.b2_dynamicBody
+      BLOCK_BODYDEF.position.Set( x, y )
       block = @world.CreateBody(BLOCK_BODYDEF)
       fixture = block.CreateFixture(BLOCK_FIXDEF)
       block.SetUserData("block")
@@ -119,7 +121,7 @@ define ['jquery', 'underscore', 'b2', 'noise', 'stats', 'multi_contact_listener'
       FORCE_JUMP = 0.8
       FORCE_WALK = 4.0
       FORCE_FLY = 0.05
-      loc = @you.GetWorldPoint(new b2.Vec2(0, 0))
+      loc = @you.GetWorldCenter()
 
       if 'w' of keysPressed and @canJump > 0
         @you.ApplyImpulse(new b2.Vec2(0, -FORCE_JUMP), loc)
@@ -146,6 +148,8 @@ define ['jquery', 'underscore', 'b2', 'noise', 'stats', 'multi_contact_listener'
 
       method() for method in @delegates
       @delegates = []
+
+      bullet.ApplyForce(@world.GetGravity().GetNegative(), bullet.GetWorldCenter()) for bullet in @bullets
 
       @world.Step(delta / 1000, 10, 10)
       @world.ClearForces()
@@ -177,6 +181,7 @@ define ['jquery', 'underscore', 'b2', 'noise', 'stats', 'multi_contact_listener'
       fixDef.density = 0.0
       fixDef.friction = 0.0
       fixDef.restitution = 0
+      # fixDef.isSensor = true
       fixDef.shape = new b2.CircleShape(.05)
 
       body.CreateFixture(fixDef)
@@ -188,7 +193,12 @@ define ['jquery', 'underscore', 'b2', 'noise', 'stats', 'multi_contact_listener'
             @delegates.push(=>@world.DestroyBody(otherFixture.GetBody()))
           else if button is 2
             @delegates.push(=>
-              @createBlock(body.GetWorldCenter().x, body.GetWorldCenter().y)
+              blockCenter = body.GetWorldCenter()
+              offset = contact.GetManifold().m_localPoint
+              length = offset.Normalize()
+              offset.Multiply(length - fixDef.shape.GetRadius())
+              blockCenter.Add(offset)
+              @createBlock(blockCenter.x, blockCenter.y)
             )
 
           @bullets = _.without(@bullets, body)
