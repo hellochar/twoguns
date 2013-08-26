@@ -1,4 +1,4 @@
-define ['jquery', 'underscore', 'b2', 'noise', 'stats', 'multi_contact_listener'], ($, _, b2, ClassicalNoise, Stats, MultiContactListener) ->
+define ['jquery', 'underscore', 'b2', 'noise', 'stats', 'multi_contact_listener', 'game/player_body'], ($, _, b2, ClassicalNoise, Stats, MultiContactListener, PlayerBody) ->
   # model of the game
   #
   #   there is a physics world, with objects etc.
@@ -40,7 +40,7 @@ define ['jquery', 'underscore', 'b2', 'noise', 'stats', 'multi_contact_listener'
       world.CreateBody(BLOCK_BODYDEF).CreateFixture(BLOCK_FIXDEF)
 
       # create you
-      @you = @makePlayerCharacter()
+      @you = PlayerBody.create(@world)
 
       # create platform boxes
       @noise = new ClassicalNoise()
@@ -49,51 +49,11 @@ define ['jquery', 'underscore', 'b2', 'noise', 'stats', 'multi_contact_listener'
       #array of b2.Body's that are my bullets
       @bullets = []
 
+      # callbacks to be invoked right before the game steps
       @delegates = []
 
+      # an array of {location: (x, y)} objects that denote where particles live
       @particles = []
-
-    makePlayerCharacter: (height = 1.3, width = 0.2) =>
-      bodyDef = new b2.BodyDef
-      bodyDef.type = b2.Body.b2_dynamicBody
-      bodyDef.position.Set(0, 0)
-      bodyDef.fixedRotation = true
-      bodyDef.allowSleep = false
-
-      body = @world.CreateBody(bodyDef)
-
-      fixDef = new b2.FixtureDef
-
-      #  main body/torso
-      fixDef.density = 1.0
-      fixDef.friction = 0
-      fixDef.restitution = 0
-      fixDef.shape = new b2.PolygonShape
-      fixDef.shape.SetAsBox( width / 2, height / 2 )
-
-      body.torso = body.CreateFixture(fixDef)
-
-      FEET_HEIGHT = 0.01
-      FEET_WIDTH = width / 2 - .01
-      fixDef.shape.SetAsVector([
-        new b2.Vec2(FEET_WIDTH, height / 2),
-        new b2.Vec2(FEET_WIDTH, height / 2 + FEET_HEIGHT),
-        new b2.Vec2(-FEET_WIDTH, height / 2 + FEET_HEIGHT),
-        new b2.Vec2(-FEET_WIDTH, height / 2)
-      ])
-      fixDef.friction = 0
-      body.feet = body.CreateFixture(fixDef)
-
-      @canJump = 0
-      $(body.feet).on("begincontact", (evt, contact, myFixture, otherFixture) =>
-        @canJump += 1
-      )
-      $(body.feet).on("endcontact", (evt, contact, myFixture, otherFixture) =>
-        @canJump -= 1
-      )
-
-      body
-
 
     #
     # noiseScalar:
@@ -118,38 +78,10 @@ define ['jquery', 'underscore', 'b2', 'noise', 'stats', 'multi_contact_listener'
       fixture = block.CreateFixture(BLOCK_FIXDEF)
       block.SetUserData("block")
 
-    updateYou: (keysPressed, mouse) =>
-      FORCE_JUMP = 0.8
-      FORCE_WALK = 4.0
-      FORCE_FLY = 0.05
-      loc = @you.GetWorldCenter()
-
-      if 'w' of keysPressed and @canJump > 0
-        @you.ApplyImpulse(new b2.Vec2(0, -FORCE_JUMP), loc)
-
-      if 'space' of keysPressed
-        @you.ApplyImpulse(new b2.Vec2(0, -FORCE_FLY), loc)
-
-      vel = @you.GetLinearVelocity()
-
-      if 'a' of keysPressed
-        # force = Math.min(Math.max(-FORCE_WALK, -FORCE_WALK - vel.x), 0)
-        # @you.ApplyImpulse(new b2.Vec2(force, 0), loc)
-        @you.SetLinearVelocity(new b2.Vec2(-FORCE_WALK, vel.y))
-      else if 'd' of keysPressed
-        # force = Math.max(Math.min(FORCE_WALK, FORCE_WALK - vel.x), 0)
-        # @you.ApplyImpulse(new b2.Vec2(force, 0), loc)
-        @you.SetLinearVelocity(new b2.Vec2(FORCE_WALK, vel.y))
-      else
-        @you.SetLinearVelocity(new b2.Vec2(0, vel.y))
-
-      if 's' of keysPressed
-        @you.ApplyImpulse(new b2.Vec2(0, FORCE_JUMP / 10), loc)
-
     step: (keysPressed, mouse, delta) =>
-      @updateYou(keysPressed, mouse)
+      @you.update(keysPressed, mouse)
 
-      direction = @getDirectionFromYou(mouse.location)
+      direction = @you.directionTo(mouse.location)
       point2 = @you.GetWorldCenter().Copy()
       direction.Multiply(100)
       point2.Add(direction)
@@ -171,19 +103,8 @@ define ['jquery', 'underscore', 'b2', 'noise', 'stats', 'multi_contact_listener'
       @world.Step(delta / 1000, 10, 10)
       @world.ClearForces()
 
-    getDirectionFromYou: (x, y) =>
-      if "x" of x and "y" of x and y == undefined
-        {x: x, y: y} = x
-
-      direction = new b2.Vec2(x, y)
-      direction.Subtract(@you.GetWorldCenter())
-      direction.Normalize()
-
-      direction
-
-
     mouseDown: (location, button) =>
-      direction = @getDirectionFromYou(location)
+      direction = @you.directionTo(location)
 
       bodyDef = new b2.BodyDef()
       bodyDef.type = b2.Body.b2_dynamicBody
