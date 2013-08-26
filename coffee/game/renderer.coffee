@@ -31,23 +31,26 @@ define ['b2'], (b2) ->
     render: (keysPressed, mouse, game) =>
       game.world.SetDebugDraw(@debugDraw)
 
+      # these two must go together in order to make @center.SetV work
       @lookAt(game.you.GetPosition())
       @center.SetV(@worldVec2(new b2.Vec2(mouse.x, mouse.y)))
 
       @debugDraw.SetSprite(@cq.context)
-      @debugDraw.SetDrawScale(@scale())
-      @debugDraw.SetFillAlpha(0.5)
-      @debugDraw.SetLineThickness(0.05)
 
       @cq.clear()
       @cq.context.save()
 
-      @cq.translate(
+      @cq
+      .translate(
         @cq.canvas.width/2 - @center.x * @scale(),
-        @cq.canvas.height/2 - @center.y * @scale()
-      )
+        @cq.canvas.height/2 - @center.y * @scale())
+      .scale(@scale(), @scale())
+      .lineWidth(0.025).globalAlpha(0.5)
 
       game.world.DrawDebugData()
+
+      for particle in game.particles
+        @cq.fillStyle("red").circle(particle.location.x, particle.location.y, 0.05).fill()
 
       @cq.context.restore()
 

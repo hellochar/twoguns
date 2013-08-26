@@ -37,7 +37,11 @@ require ['jquery', 'b2', 'socket.io', 'canvasquery', 'game/game', 'game/renderer
     # game logic loop
     onStep: (delta, time) ->
       @stats.begin()
-      @game.step(keysPressed, mouse, delta)
+      mouseWorld = {
+        location: @renderer.worldVec2(new b2.Vec2(mouse.x, mouse.y))
+        button: mouse.button
+      }
+      @game.step(keysPressed, mouseWorld, delta)
       @stats.end()
 
     # rendering loop

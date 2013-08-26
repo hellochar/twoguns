@@ -51,6 +51,8 @@ define ['jquery', 'underscore', 'b2', 'noise', 'stats', 'multi_contact_listener'
 
       @delegates = []
 
+      @particles = []
+
     makePlayerCharacter: (height = 1.3, width = 0.2) =>
       bodyDef = new b2.BodyDef
       bodyDef.type = b2.Body.b2_dynamicBody
@@ -116,8 +118,7 @@ define ['jquery', 'underscore', 'b2', 'noise', 'stats', 'multi_contact_listener'
       fixture = block.CreateFixture(BLOCK_FIXDEF)
       block.SetUserData("block")
 
-
-    step: (keysPressed, mouse, delta) =>
+    updateYou: (keysPressed, mouse) =>
       FORCE_JUMP = 0.8
       FORCE_WALK = 4.0
       FORCE_FLY = 0.05
@@ -145,6 +146,22 @@ define ['jquery', 'underscore', 'b2', 'noise', 'stats', 'multi_contact_listener'
       if 's' of keysPressed
         @you.ApplyImpulse(new b2.Vec2(0, FORCE_JUMP / 10), loc)
 
+    step: (keysPressed, mouse, delta) =>
+      @updateYou(keysPressed, mouse)
+
+      direction = @getDirectionFromYou(mouse.location)
+      point2 = @you.GetWorldCenter().Copy()
+      direction.Multiply(100)
+      point2.Add(direction)
+
+      @particles = []
+      @world.RayCast((fixture, point, normal, fraction) =>
+        @particles.push({
+          location: point
+          direction: normal
+        })
+        return 1
+      , @you.GetWorldCenter(), point2)
 
       method() for method in @delegates
       @delegates = []
@@ -154,25 +171,33 @@ define ['jquery', 'underscore', 'b2', 'noise', 'stats', 'multi_contact_listener'
       @world.Step(delta / 1000, 10, 10)
       @world.ClearForces()
 
-    mouseDown: (location, button) =>
-      offset = new b2.Vec2()
-      offset.SetV(location)
-      offset.Subtract(@you.GetWorldCenter())
+    getDirectionFromYou: (x, y) =>
+      if "x" of x and "y" of x and y == undefined
+        {x: x, y: y} = x
 
+      direction = new b2.Vec2(x, y)
+      direction.Subtract(@you.GetWorldCenter())
+      direction.Normalize()
+
+      direction
+
+
+    mouseDown: (location, button) =>
+      direction = @getDirectionFromYou(location)
 
       bodyDef = new b2.BodyDef()
       bodyDef.type = b2.Body.b2_dynamicBody
       bodyDef.bullet = true
 
       bodyDef.position.SetV(@you.GetWorldCenter())
-      positionOffset = offset.Copy()
+      positionOffset = direction.Copy()
       DISTANCE_OFFSET = .2
-      positionOffset.Multiply(DISTANCE_OFFSET / positionOffset.Length())
+      positionOffset.Multiply(DISTANCE_OFFSET)
       bodyDef.position.Add(positionOffset)
 
       BULLET_SPEED = 10
-      bodyDef.linearVelocity.SetV(offset)
-      bodyDef.linearVelocity.Multiply(BULLET_SPEED / bodyDef.linearVelocity.Length())
+      bodyDef.linearVelocity.SetV(direction)
+      bodyDef.linearVelocity.Multiply(BULLET_SPEED)
       bodyDef.linearVelocity.Add(@you.GetLinearVelocity())
 
       body = @world.CreateBody(bodyDef)
@@ -194,10 +219,10 @@ define ['jquery', 'underscore', 'b2', 'noise', 'stats', 'multi_contact_listener'
           else if button is 2
             @delegates.push(=>
               blockCenter = body.GetWorldCenter()
-              offset = contact.GetManifold().m_localPoint
-              length = offset.Normalize()
-              offset.Multiply(length - fixDef.shape.GetRadius())
-              blockCenter.Add(offset)
+              direction = contact.GetManifold().m_localPoint
+              length = direction.Normalize()
+              direction.Multiply(length - fixDef.shape.GetRadius())
+              blockCenter.Add(direction)
               @createBlock(blockCenter.x, blockCenter.y)
             )
 
