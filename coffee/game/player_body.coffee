@@ -111,7 +111,6 @@ define [
         cq.beginPath()
         for angle in [0..Math.PI*2] by (Math.PI*2) / 200
           dir = new b2.Vec2(Math.cos(angle), Math.sin(angle))
-          hitOnce = false
           isect = @world.rayIntersect(@GetWorldCenter(), dir,
             (fixture) => fixture.GetBody() isnt this and fixture.GetBody().GetUserData() isnt "bullet"
           )

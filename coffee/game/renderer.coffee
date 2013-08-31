@@ -1,4 +1,4 @@
-define ['b2'], (b2) ->
+define ['b2', 'utils'], (b2, Utils) ->
 
   class Renderer
     constructor: (@viewportWidth, @cq) ->
@@ -7,6 +7,8 @@ define ['b2'], (b2) ->
       # setup debug draw
       @debugDraw = new b2.DebugDraw()
       @debugDraw.SetFlags(b2.DebugDraw.e_shapeBit | b2.DebugDraw.e_jointBit)
+      @alpha = 1
+      @fillAlpha = 1
 
     lookAt: (center) => @center.SetV(center)
 
@@ -54,11 +56,73 @@ define ['b2'], (b2) ->
       # @cq.context.globalCompositeOperation = "source-atop"
       game.world.DrawDebugData()
 
+      # Utils.nextIterator game.world.m_bodyList, (b) =>
+      #    Utils.nextIterator b.GetFixtureList(), (f) =>
+      #      xf = b.m_xf
+      #      s = f.GetShape()
+      #      if (b.IsActive() == false)
+      #        color = [ 128, 128, 77 ]
+      #      else if (b.GetType() == b2.Body.b2_staticBody)
+      #        color = [ 128, 230, 128 ]
+      #      else if (b.GetType() == b2.Body.b2_kinematicBody)
+      #        color = [ 128, 128, 230 ]
+      #      else if (b.IsAwake() == false)
+      #        color = [ 153, 153, 153 ]
+      #      else
+      #        color = [ 230, 179, 179 ]
+      #      @drawShape(s, xf, color)
+
       for particle in game.particles
         @cq.context.save()
         particle(@cq)
         @cq.context.restore()
 
       @cq.context.restore()
+
+    drawShape: (shape, xf, color) =>
+      switch shape.m_type
+        when b2.Shape.e_circleShape
+          circle = shape
+          center = b2.Math.MulX(xf, circle.m_p)
+          radius = circle.m_radius
+          axis = xf.R.col1
+          @drawSolidCircle(center, radius, axis, color)
+        when b2.Shape.e_polygonShape
+          vertices = (b2.Math.MulX(xf, v) for v in shape.GetVertices())
+          @drawSolidPolygon(vertices, color)
+        when b2.Shape.e_edgeShape
+          edge = shape
+          @drawSegment(b2.Math.MulX(xf, edge.GetVertex1()), b2.Math.MulX(xf, edge.GetVertex2()), color)
+
+    drawSolidCircle: (center, radius, axis, color) =>
+      return if not radius
+      s = @cq.context
+      drawScale = 1
+      cx = center.x * drawScale
+      cy = center.y * drawScale
+      s.moveTo(0, 0)
+      s.beginPath()
+      s.strokeStyle = "rgba(#{color[0]}, #{color[1]}, #{color[2]}, #{@alpha}"
+      s.fillStyle = "rgba(#{color[0]}, #{color[1]}, #{color[2]}, #{@fillAlpha}"
+      s.arc(cx, cy, radius * drawScale, 0, Math.PI * 2, true)
+      s.moveTo(cx, cy)
+      s.lineTo((center.x + axis.x * radius) * drawScale, (center.y + axis.y * radius) * drawScale)
+      s.closePath()
+      s.fill()
+      s.stroke()
+
+    drawSolidPolygon: (vertices, color) =>
+      s = @cq.context
+      s.beginPath()
+      s.strokeStyle = "rgba(#{color[0]}, #{color[1]}, #{color[2]}, #{@alpha})"
+      s.fillStyle = "rgba(#{color[0]}, #{color[1]}, #{color[2]}, #{@fillAlpha})"
+      s.moveTo(vertices[0].x , vertices[0].y )
+      s.lineTo(v.x , v.y) for v in vertices[1..]
+      s.lineTo(vertices[0].x , vertices[0].y )
+      s.closePath()
+      s.fill()
+      s.stroke()
+
+
 
   return Renderer
