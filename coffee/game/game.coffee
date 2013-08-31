@@ -1,4 +1,13 @@
-define ['jquery', 'underscore', 'b2', 'noise', 'stats', 'multi_contact_listener', 'game/player_body'], ($, _, b2, ClassicalNoise, Stats, MultiContactListener, PlayerBody) ->
+define [
+  'jquery',
+  'underscore',
+  'b2',
+  'noise',
+  'stats',
+  'multi_contact_listener',
+  'game/player_body'
+  'maybe'
+], ($, _, b2, ClassicalNoise, Stats, MultiContactListener, PlayerBody, Maybe) ->
   # model of the game
   #
   #   there is a physics world, with objects etc.
@@ -40,19 +49,15 @@ define ['jquery', 'underscore', 'b2', 'noise', 'stats', 'multi_contact_listener'
       world.CreateBody(BLOCK_BODYDEF).CreateFixture(BLOCK_FIXDEF)
 
       # create you
-      @you = PlayerBody.create(@world)
+      @you = PlayerBody.create(@)
 
       # create platform boxes
       @noise = new ClassicalNoise()
       @generateNoiseBoxes(3)
 
-      #array of b2.Body's that are my bullets
-      @bullets = []
-
       # callbacks to be invoked right before the game steps
       @delegates = []
 
-      # an array of {location: (x, y)} objects that denote where particles live
       @particles = []
 
     #
@@ -79,80 +84,17 @@ define ['jquery', 'underscore', 'b2', 'noise', 'stats', 'multi_contact_listener'
       block.SetUserData("block")
 
     step: (keysPressed, mouse, delta) =>
-      @you.update(keysPressed, mouse)
-
-      direction = @you.directionTo(mouse.location)
-      point2 = @you.GetWorldCenter().Copy()
-      direction.Multiply(100)
-      point2.Add(direction)
-
       @particles = []
-      @world.RayCast((fixture, point, normal, fraction) =>
-        @particles.push({
-          location: point
-          direction: normal
-        })
-        return 1
-      , @you.GetWorldCenter(), point2)
+
+      @you.update(keysPressed, mouse)
 
       method() for method in @delegates
       @delegates = []
-
-      bullet.ApplyForce(@world.GetGravity().GetNegative(), bullet.GetWorldCenter()) for bullet in @bullets
-
       @world.Step(delta / 1000, 10, 10)
       @world.ClearForces()
 
     mouseDown: (location, button) =>
-      direction = @you.directionTo(location)
-
-      bodyDef = new b2.BodyDef()
-      bodyDef.type = b2.Body.b2_dynamicBody
-      bodyDef.bullet = true
-
-      bodyDef.position.SetV(@you.GetWorldCenter())
-      positionOffset = direction.Copy()
-      DISTANCE_OFFSET = .2
-      positionOffset.Multiply(DISTANCE_OFFSET)
-      bodyDef.position.Add(positionOffset)
-
-      BULLET_SPEED = 10
-      bodyDef.linearVelocity.SetV(direction)
-      bodyDef.linearVelocity.Multiply(BULLET_SPEED)
-      bodyDef.linearVelocity.Add(@you.GetLinearVelocity())
-
-      body = @world.CreateBody(bodyDef)
-
-      fixDef = new b2.FixtureDef()
-      fixDef.density = 0.0
-      fixDef.friction = 0.0
-      fixDef.restitution = 0
-      # fixDef.isSensor = true
-      fixDef.shape = new b2.CircleShape(.05)
-
-      body.CreateFixture(fixDef)
-
-      $(body).on("begincontact", (evt, contact, myFixture, otherFixture) =>
-        if contact.IsTouching() and otherFixture.GetBody().GetUserData() is "block"
-          @delegates.push(=>@world.DestroyBody(body))
-          if button is 0
-            @delegates.push(=>@world.DestroyBody(otherFixture.GetBody()))
-          else if button is 2
-            @delegates.push(=>
-              blockCenter = body.GetWorldCenter()
-              direction = contact.GetManifold().m_localPoint
-              length = direction.Normalize()
-              direction.Multiply(length - fixDef.shape.GetRadius())
-              blockCenter.Add(direction)
-              @createBlock(blockCenter.x, blockCenter.y)
-            )
-
-          @bullets = _.without(@bullets, body)
-          $(body).off("begincontact")
-      )
-
-      @bullets.push(body)
-
+      @you.shootAt(location, {0: "create", 2: "destroy"}[button])
 
 
 

@@ -49,8 +49,7 @@ define ['b2'], (b2) ->
 
       game.world.DrawDebugData()
 
-      for particle in game.particles
-        @cq.fillStyle("red").circle(particle.location.x, particle.location.y, 0.05).fill()
+      particle(@cq) for particle in game.particles
 
       @cq.context.restore()
 

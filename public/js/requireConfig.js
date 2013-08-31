@@ -9,6 +9,7 @@ var require = {
         noise: ['vendor/noise'],
         stats: ['vendor/stats'],
         underscore: ['vendor/underscore'],
+        maybe: 'vendor/maybe',
     },
     shim: {
         box2d: {
@@ -22,6 +23,9 @@ var require = {
         },
         underscore: {
             exports: '_'
+        },
+        maybe: {
+            exports: 'Maybe'
         },
     }
 };

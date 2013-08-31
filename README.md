@@ -35,7 +35,7 @@ Multiplayer shooting platformer with destructible terrain
         - Set looking
 
 ## bugs
-- bullets shouldn't obey gravity
+- <s>bullets shouldn't obey gravity</s>
 
 ### Supporting
 - <s>Write code in coffeescript and auto-compile to public/</s>
