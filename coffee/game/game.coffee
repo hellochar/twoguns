@@ -32,6 +32,34 @@ define [
         ,  true         # allow sleep
         )
 
+      world.rayIntersect = (point1, dir, filter) ->
+        arr = []
+        point2 = point1.Copy()
+        offset = dir.Copy()
+        offset.Multiply(10000)
+        point2.Add(offset)
+
+        @RayCast((fixture, point, normal, fraction) =>
+          if !(filter?) or filter?(fixture, point, normal, fraction)
+            arr.push(
+              fixture: fixture
+              point: point
+              normal: normal
+              fraction: fraction
+            )
+          return fraction
+        , point1, point2)
+
+        if arr.length > 0
+          _.min(arr, (obj) =>
+            offset = obj.point.Copy()
+            offset.Subtract(point1)
+            offset.LengthSquared()
+          )
+        else
+          undefined
+
+
       window.mcl = new MultiContactListener(world)
 
       # create top/bottom

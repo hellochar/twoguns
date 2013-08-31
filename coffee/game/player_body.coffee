@@ -95,26 +95,15 @@ define [
       direction.Multiply(100)
       point2.Add(direction)
       sightline = ( =>
-        arr = []
-        @world.RayCast((fixture, point, normal, fraction) =>
-          if fixture.GetBody().GetUserData() is "block"
-            arr.push({
-              location: point
-              direction: normal
-            })
-          return 1
-        , @GetWorldCenter(), point2)
-        if arr.length > 0
-          closestPoint = _.min(arr, (obj) =>
-            offset = obj.location.Copy()
-            offset.Subtract(@GetWorldCenter())
-            offset.LengthSquared()
-          )
+        isect = @world.rayIntersect(@GetWorldCenter(), direction,
+          (fixture) -> fixture.GetBody().GetUserData() is "block"
+        )
+        if isect
           return (cq) =>
-            cq.fillStyle("red").circle(closestPoint.location.x, closestPoint.location.y, 0.05).fill()
+            cq.fillStyle("red").circle(isect.point.x, isect.point.y, 0.05).fill()
             cq.strokeStyle("red").beginPath().
               moveTo(@GetWorldCenter().x, @GetWorldCenter().y).
-              lineTo(closestPoint.location.x, closestPoint.location.y).
+              lineTo(isect.point.x, isect.point.y).
               stroke()
         else
           undefined

@@ -28,11 +28,15 @@ Multiplayer shooting platformer with destructible terrain
     - Gun?
         - Gun should angle along with head
         - Located in front of you (held by your hands)
+    - Perhaps just a collection of blocks
+        killing all the blocks kills the player
+        or perhaps there's a "heart" block that you must destroy
 - Game loop
     - Look at input state
     - Take actions according to state
         - Move or jump method calls
         - Set looking
+- fog of war
 
 ## bugs
 - <s>bullets shouldn't obey gravity</s>
