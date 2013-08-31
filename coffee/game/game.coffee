@@ -32,7 +32,7 @@ define [
         ,  true         # allow sleep
         )
 
-      world.rayIntersect = (point1, dir, filter) ->
+      world.rayIntersectAll = (point1, dir, filter) ->
         arr = []
         point2 = point1.Copy()
         offset = dir.Copy()
@@ -47,8 +47,13 @@ define [
               normal: normal
               fraction: fraction
             )
-          return fraction
+          return 1
         , point1, point2)
+
+        arr
+
+      world.rayIntersect = (point1, dir, filter) ->
+        arr = world.rayIntersectAll(point1, dir, filter)
 
         if arr.length > 0
           _.min(arr, (obj) =>

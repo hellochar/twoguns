@@ -47,9 +47,17 @@ define ['b2'], (b2) ->
       .scale(@scale(), @scale())
       .lineWidth(0.025).globalAlpha(0.5)
 
+      @cq.fillStyle("#ffffff")
+      # @cq.context.globalCompositeOperation = "source-over"
+      game.makeVisionPoly?(@cq)
+
+      # @cq.context.globalCompositeOperation = "source-atop"
       game.world.DrawDebugData()
 
-      particle(@cq) for particle in game.particles
+      for particle in game.particles
+        @cq.context.save()
+        particle(@cq)
+        @cq.context.restore()
 
       @cq.context.restore()
 

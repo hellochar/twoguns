@@ -68,7 +68,7 @@ define [
       FORCE_WALK_X = 4.0
       # FORCE_FLY = new b2.Vec2(0, -0.8 * @world.GetGravity().y)
       FORCE_FLY = new b2.Vec2(0, -0.8)
-      loc = @GetWorldCenter()
+      loc = @GetWorldCenter().Copy()
 
       if 'w' of keysPressed and @canJump()
         @ApplyImpulse(IMPULSE_JUMP, loc)
@@ -91,9 +91,6 @@ define [
       bullet.ApplyForce(@world.GetGravity().GetNegative(), bullet.GetWorldCenter()) for bullet in @bullets
 
       direction = @directionTo(mouse.location)
-      point2 = @GetWorldCenter().Copy()
-      direction.Multiply(100)
-      point2.Add(direction)
       sightline = ( =>
         isect = @world.rayIntersect(@GetWorldCenter(), direction,
           (fixture) -> fixture.GetBody().GetUserData() is "block"
@@ -109,6 +106,26 @@ define [
           undefined
       )()
       @game.particles.push(sightline) if sightline
+
+      @game.makeVisionPoly = (cq) =>
+        cq.beginPath()
+        for angle in [0..Math.PI*2] by (Math.PI*2) / 200
+          dir = new b2.Vec2(Math.cos(angle), Math.sin(angle))
+          hitOnce = false
+          isect = @world.rayIntersect(@GetWorldCenter(), dir,
+            (fixture) => fixture.GetBody() isnt this and fixture.GetBody().GetUserData() isnt "bullet"
+          )
+
+          point = isect?.point
+          if not point
+            point = @GetWorldCenter().Copy()
+            offset = dir.Copy()
+            offset.Multiply(100)
+            point.Add(offset)
+
+          cq.lineTo(point.x, point.y)
+        cq.fill()
+
 
     directionTo: (x, y) ->
       if "x" of x and "y" of x and y == undefined
@@ -147,6 +164,7 @@ define [
       fixDef.shape = new b2.CircleShape(.05)
 
       body.CreateFixture(fixDef)
+      body.SetUserData("bullet")
 
       $(body).on("begincontact", (evt, contact, myFixture, otherFixture) =>
         if contact.IsTouching()
