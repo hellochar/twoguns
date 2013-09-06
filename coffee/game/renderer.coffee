@@ -51,28 +51,32 @@ define ['b2', 'utils'], (b2, Utils) ->
 
       @cq.fillStyle("#ffffff")
       @cq.context.globalCompositeOperation = "source-over"
-      game.makeVisionPoly?(@cq)
+      {visibleBlocks: visibleBlocks, visionPolygon: visionPolygon} = game.you.getVisionInfo()
+      visionPolygon = Utils.getInset(visionPolygon, -0.1)
 
-      # @cq.context.globalCompositeOperation = "source-atop"
-      # game.world.DrawDebugData()
+      @cq.beginPath()
+      @cq.lineTo(p.x, p.y) for p in visionPolygon
+      @cq.fill()
 
+      @cq.context.globalCompositeOperation = "source-atop"
       b = game.world.m_bodyList
       while b
         xf = b.m_xf
         f = b.GetFixtureList()
         while f
           s = f.GetShape()
-          if (b.IsActive() == false)
+          if not b.IsActive()
             color = [ 128, 128, 77 ]
-          else if (b.GetType() == b2.Body.b2_staticBody)
+          else if b.GetType() is b2.Body.b2_staticBody
             color = [ 128, 230, 128 ]
-          else if (b.GetType() == b2.Body.b2_kinematicBody)
+          else if b.GetType() is b2.Body.b2_kinematicBody
             color = [ 128, 128, 230 ]
-          else if (b.IsAwake() == false)
+          else if not b.IsAwake()
             color = [ 153, 153, 153 ]
           else
             color = [ 230, 179, 179 ]
-          @drawShape(s, xf, color)
+          # @drawShape(s, xf, color) if (b.GetUserData() is "block" and b in visibleBlocks) or (b.GetUserData() isnt "block")
+          @drawShape(s, xf, color) if (b.GetUserData() is "block" and b in visibleBlocks) or (b.GetUserData() isnt "block")
           f = f.m_next
         b = b.m_next
 
@@ -106,8 +110,10 @@ define ['b2', 'utils'], (b2, Utils) ->
       cy = center.y * drawScale
       s.moveTo(0, 0)
       s.beginPath()
-      s.strokeStyle = "rgba(#{color[0]}, #{color[1]}, #{color[2]}, #{@alpha}"
-      s.fillStyle = "rgba(#{color[0]}, #{color[1]}, #{color[2]}, #{@fillAlpha}"
+      # s.strokeStyle = "rgba(#{color[0]}, #{color[1]}, #{color[2]}, #{@alpha}"
+      # s.fillStyle = "rgba(#{color[0]}, #{color[1]}, #{color[2]}, #{@fillAlpha}"
+      s.strokeStyle = "red"
+      s.fillStyle = "red"
       s.arc(cx, cy, radius * drawScale, 0, Math.PI * 2, true)
       s.moveTo(cx, cy)
       s.lineTo((center.x + axis.x * radius) * drawScale, (center.y + axis.y * radius) * drawScale)
