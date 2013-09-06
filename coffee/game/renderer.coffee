@@ -50,27 +50,31 @@ define ['b2', 'utils'], (b2, Utils) ->
       .lineWidth(0.025).globalAlpha(0.5)
 
       @cq.fillStyle("#ffffff")
-      # @cq.context.globalCompositeOperation = "source-over"
+      @cq.context.globalCompositeOperation = "source-over"
       game.makeVisionPoly?(@cq)
 
       # @cq.context.globalCompositeOperation = "source-atop"
-      game.world.DrawDebugData()
+      # game.world.DrawDebugData()
 
-      # Utils.nextIterator game.world.m_bodyList, (b) =>
-      #    Utils.nextIterator b.GetFixtureList(), (f) =>
-      #      xf = b.m_xf
-      #      s = f.GetShape()
-      #      if (b.IsActive() == false)
-      #        color = [ 128, 128, 77 ]
-      #      else if (b.GetType() == b2.Body.b2_staticBody)
-      #        color = [ 128, 230, 128 ]
-      #      else if (b.GetType() == b2.Body.b2_kinematicBody)
-      #        color = [ 128, 128, 230 ]
-      #      else if (b.IsAwake() == false)
-      #        color = [ 153, 153, 153 ]
-      #      else
-      #        color = [ 230, 179, 179 ]
-      #      @drawShape(s, xf, color)
+      b = game.world.m_bodyList
+      while b
+        xf = b.m_xf
+        f = b.GetFixtureList()
+        while f
+          s = f.GetShape()
+          if (b.IsActive() == false)
+            color = [ 128, 128, 77 ]
+          else if (b.GetType() == b2.Body.b2_staticBody)
+            color = [ 128, 230, 128 ]
+          else if (b.GetType() == b2.Body.b2_kinematicBody)
+            color = [ 128, 128, 230 ]
+          else if (b.IsAwake() == false)
+            color = [ 153, 153, 153 ]
+          else
+            color = [ 230, 179, 179 ]
+          @drawShape(s, xf, color)
+          f = f.m_next
+        b = b.m_next
 
       for particle in game.particles
         @cq.context.save()
