@@ -6,8 +6,7 @@ define [
   'stats',
   'multi_contact_listener',
   'game/player_body'
-  'maybe'
-], ($, _, b2, ClassicalNoise, Stats, MultiContactListener, PlayerBody, Maybe) ->
+], ($, _, b2, ClassicalNoise, Stats, MultiContactListener, PlayerBody) ->
   # model of the game
   #
   #   there is a physics world, with objects etc.
