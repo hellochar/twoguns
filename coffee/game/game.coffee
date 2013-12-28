@@ -2,11 +2,12 @@ define [
   'jquery',
   'underscore',
   'b2',
-  'noise',
   'stats',
   'multi_contact_listener',
+  'game/random',
   'game/player_body'
-], ($, _, b2, ClassicalNoise, Stats, MultiContactListener, PlayerBody) ->
+  'game/world/game_world'
+], ($, _, b2, Stats, MultiContactListener, Random, PlayerBody, GameWorld) ->
   # model of the game
   #
   #   there is a physics world, with objects etc.
@@ -15,7 +16,6 @@ define [
   #   there is a win/lose condition
 
   class Game
-
     BLOCK_BODYDEF = new b2.BodyDef
     BLOCK_BODYDEF.type = b2.Body.b2_staticBody
 
@@ -25,61 +25,22 @@ define [
     BLOCK_FIXDEF.restitution = 0
     BLOCK_FIXDEF.shape = new b2.PolygonShape
 
-    constructor: (@width, @height, @gridSize) ->
-      world = @world = new b2.World(
-        new b2.Vec2(0, 8)  # gravity
-        ,  true         # allow sleep
-        )
-      world.SetContactListener(new MultiContactListener())
-
-      # create top/bottom
-      BLOCK_FIXDEF.shape.SetAsBox(width/2, 1)
-      BLOCK_BODYDEF.position.Set(0, -( height/2 + 1 ) )
-      world.CreateBody(BLOCK_BODYDEF).CreateFixture(BLOCK_FIXDEF)
-      BLOCK_BODYDEF.position.Set(0, +( height/2 + 1 ) )
-      world.CreateBody(BLOCK_BODYDEF).CreateFixture(BLOCK_FIXDEF)
-
-      # create left/right
-      BLOCK_FIXDEF.shape.SetAsBox(1, height/2)
-      BLOCK_BODYDEF.position.Set(-( width/2 + 1 ), 0)
-      world.CreateBody(BLOCK_BODYDEF).CreateFixture(BLOCK_FIXDEF)
-      BLOCK_BODYDEF.position.Set(+( width/2 + 1 ), 0)
-      world.CreateBody(BLOCK_BODYDEF).CreateFixture(BLOCK_FIXDEF)
+    constructor: (@width, @height, @gridSize, @random = new Random()) ->
+      @world = new GameWorld(new b2.Vec2(0, 8), true, this)
 
       # create you
       @you = PlayerBody.create(@)
 
-      # create platform boxes
-      @noise = new ClassicalNoise()
-      @generateNoiseBoxes(3)
-
       # callbacks to be invoked right before the game steps
+      # Use this to e.g. add and remove blocks that you can't do during
+      # a callback function for collisions
       @delegates = []
 
+      # particles are methods that get the rendering context passed to them so they can draw; they're also cleared at every time step
       @particles = []
 
-    #
-    # noiseScalar:
-    #   between 1 and 2 produces a dense maze-like structure (it seems that any 1 < n < 2 has the same characteristics)
-    #   exactly 2 produces quite thin lines, somewhat sparse
-    #   after 2 the usual noisey-ness comes into play
-    #
-    #
-    generateNoiseBoxes: (noiseScalar) =>
-      BLOCK_FIXDEF.shape.SetAsBox(@gridSize / 2, @gridSize / 2)
-      for x in [-@width/2...@width/2] by @gridSize
-        for y in [-@height/2...@height/2] by @gridSize
-          if (@noise.noise(x/noiseScalar, y/noiseScalar, 0) + 1) / 2 < .5
-            @createBlock(x + @gridSize / 2, y + @gridSize / 2)
-            # query neighbors, create contacts
-
-    createBlock: (x, y, isStatic) =>
-      isStatic ?= true
-      BLOCK_BODYDEF.type = if isStatic then b2.Body.b2_staticBody else b2.Body.b2_dynamicBody
-      BLOCK_BODYDEF.position.Set( x, y )
-      block = @world.CreateBody(BLOCK_BODYDEF)
-      fixture = block.CreateFixture(BLOCK_FIXDEF)
-      block.SetUserData("block")
+    createBlock: (x, y, isStatic = true) =>
+      @world.createBlock(x, y, isStatic)
 
     # keysPressed = char (as a string) -> true
     # mouse = {location, button}
