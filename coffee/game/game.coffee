@@ -6,8 +6,7 @@ define [
   'stats',
   'multi_contact_listener',
   'game/player_body'
-  'maybe'
-], ($, _, b2, ClassicalNoise, Stats, MultiContactListener, PlayerBody, Maybe) ->
+], ($, _, b2, ClassicalNoise, Stats, MultiContactListener, PlayerBody) ->
   # model of the game
   #
   #   there is a physics world, with objects etc.
@@ -31,41 +30,7 @@ define [
         new b2.Vec2(0, 8)  # gravity
         ,  true         # allow sleep
         )
-
-      world.rayIntersectAll = (point1, dir, filter) ->
-        arr = []
-        point2 = point1.Copy()
-        offset = dir.Copy()
-        offset.Multiply(10000)
-        point2.Add(offset)
-
-        @RayCast((fixture, point, normal, fraction) =>
-          if !(filter?) or filter?(fixture, point, normal, fraction)
-            arr.push(
-              fixture: fixture
-              point: point
-              normal: normal
-              fraction: fraction
-            )
-          return 1
-        , point1, point2)
-
-        arr
-
-      world.rayIntersect = (point1, dir, filter) ->
-        arr = world.rayIntersectAll(point1, dir, filter)
-
-        if arr.length > 0
-          _.min(arr, (obj) =>
-            offset = obj.point.Copy()
-            offset.Subtract(point1)
-            offset.LengthSquared()
-          )
-        else
-          undefined
-
-
-      window.mcl = new MultiContactListener(world)
+      world.SetContactListener(new MultiContactListener())
 
       # create top/bottom
       BLOCK_FIXDEF.shape.SetAsBox(width/2, 1)
@@ -116,6 +81,9 @@ define [
       fixture = block.CreateFixture(BLOCK_FIXDEF)
       block.SetUserData("block")
 
+    # keysPressed = char (as a string) -> true
+    # mouse = {location, button}
+    # delta = number of ms since the last call to step
     step: (keysPressed, mouse, delta) =>
       @particles = []
 
@@ -129,7 +97,45 @@ define [
     mouseDown: (location, button) =>
       @you.shootAt(location, {0: "create", 2: "destroy"}[button])
 
+    rayIntersectAll: (start, dir, filter, length = 10000) =>
+      arr = []
+      point2 = start.Copy()
+      offset = dir.Copy()
+      offset.Multiply(length)
+      point2.Add(offset)
 
+      @world.RayCast((fixture, point, normal, fraction) =>
+        if !(filter?) or filter?(fixture, point, normal, fraction)
+          arr.push(
+            fixture: fixture
+            point: point
+            normal: normal
+            fraction: fraction
+          )
+        # RayCast will keep going or stop depending on the return value; 1 means keep going
+        return 1
+      , start, point2)
+
+      arr
+
+    # returns a {fixture: b2Fixture, point: b2Vec2, normal: b2Vec2, fraction: Number}
+    # representing the first hit of this ray
+    #
+    # start: start vec2 of the ray
+    # dir: normalized direction of the ray
+    # filter: function (fixture, point, normal, fraction) => boolean;
+    #   only look at intersections that match this filter
+    rayIntersect: (start, dir, filter, length = 10000) =>
+      arr = @rayIntersectAll(start, dir, filter)
+
+      if arr.length > 0
+        _.min(arr, (obj) =>
+          offset = obj.point.Copy()
+          offset.Subtract(start)
+          offset.LengthSquared()
+        )
+      else
+        undefined
 
 
   return Game

@@ -92,7 +92,7 @@ define [
 
       direction = @directionTo(mouse.location)
       sightline = ( =>
-        isect = @world.rayIntersect(@GetWorldCenter(), direction,
+        isect = @game.rayIntersect(@GetWorldCenter(), direction,
           (fixture) -> fixture.GetBody().GetUserData() is "block"
         )
         if isect
@@ -111,7 +111,7 @@ define [
         cq.beginPath()
         for angle in [0..Math.PI*2] by (Math.PI*2) / 200
           dir = new b2.Vec2(Math.cos(angle), Math.sin(angle))
-          isect = @world.rayIntersect(@GetWorldCenter(), dir,
+          isect = @game.rayIntersect(@GetWorldCenter(), dir,
             (fixture) => fixture.GetBody() isnt this and fixture.GetBody().GetUserData() isnt "bullet"
           )
 
