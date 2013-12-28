@@ -47,13 +47,13 @@ define ['b2', 'utils'], (b2, Utils) ->
         @cq.canvas.width/2 - @center.x * @scale(),
         @cq.canvas.height/2 - @center.y * @scale())
       .scale(@scale(), @scale())
-      .lineWidth(0.025)
+      .lineWidth(0.025).globalAlpha(0.5)
 
       @cq.fillStyle("#ffffff")
-      @cq.context.globalCompositeOperation = "source-over"
+      # @cq.context.globalCompositeOperation = "source-over"
       game.makeVisionPoly?(@cq)
 
-      @cq.context.globalCompositeOperation = "source-atop"
+      # @cq.context.globalCompositeOperation = "source-atop"
       game.world.DrawDebugData()
 
       # Utils.nextIterator game.world.m_bodyList, (b) =>
@@ -77,7 +77,6 @@ define ['b2', 'utils'], (b2, Utils) ->
         particle(@cq)
         @cq.context.restore()
 
-      # associated with render-wide save
       @cq.context.restore()
 
     drawShape: (shape, xf, color) =>

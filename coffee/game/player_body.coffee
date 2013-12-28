@@ -20,21 +20,6 @@ define [
   FIXDEF.shape = new b2.PolygonShape
 
   PlayerBody = {
-    # returns a b2.Body monkeypatched with additional methods
-    # I want the methods of the b2Body *and* the methods I declare
-    #
-    # I want - elegant and easy extension of b2Body
-    # To be able to write
-    #   game = new Game()
-    #   game.addPlayer(new Player())
-    #
-    #   Player.spawnBody(loc):
-    #     @myBody = game.CreateBody(new PlayerBody())
-    #
-    #   PlayerBody
-    #
-    #   Player.shoot(loc):
-    #     game.CreateBody(new BulletBody())
     create: (game, height = 0.6, width = 0.2) =>
       body = game.world.CreateBody(BODYDEF)
 
@@ -105,8 +90,9 @@ define [
 
       bullet.ApplyForce(@world.GetGravity().GetNegative(), bullet.GetWorldCenter()) for bullet in @bullets
 
-      line_scope_particle = ( =>
-        isect = @world.rayIntersect(@GetWorldCenter(), @directionTo(mouse.location),
+      direction = @directionTo(mouse.location)
+      sightline = ( =>
+        isect = @world.rayIntersect(@GetWorldCenter(), direction,
           (fixture) -> fixture.GetBody().GetUserData() is "block"
         )
         if isect
@@ -119,11 +105,11 @@ define [
         else
           undefined
       )()
-      @game.particles.push(line_scope_particle) if line_scope_particle
+      @game.particles.push(sightline) if sightline
 
       @game.makeVisionPoly = (cq) =>
         cq.beginPath()
-        for angle in [0..Math.PI*2] by (Math.PI*2) / 50
+        for angle in [0..Math.PI*2] by (Math.PI*2) / 200
           dir = new b2.Vec2(Math.cos(angle), Math.sin(angle))
           isect = @world.rayIntersect(@GetWorldCenter(), dir,
             (fixture) => fixture.GetBody() isnt this and fixture.GetBody().GetUserData() isnt "bullet"
