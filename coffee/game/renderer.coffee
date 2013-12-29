@@ -4,12 +4,6 @@ define ['b2', 'utils'], (b2, Utils) ->
     constructor: (@viewportWidth, @game, @cq) ->
       @center = new b2.Vec2() # world coordinates
 
-      # setup debug draw
-      @debugDraw = new b2.DebugDraw()
-      @debugDraw.SetFlags(b2.DebugDraw.e_shapeBit | b2.DebugDraw.e_jointBit)
-      @alpha = 1
-      @fillAlpha = 1
-
     lookAt: (center) => @center.SetV(center)
 
     # Move the renderer window by the given world offset
@@ -31,13 +25,9 @@ define ['b2', 'utils'], (b2, Utils) ->
     scale: => @cq.canvas.width / @viewportWidth
 
     render: (keysPressed, mouse) =>
-      @game.world.SetDebugDraw(@debugDraw)
-
       # these two must go together in order to make @center.SetV work
       @lookAt(@game.you.GetPosition())
       @center.SetV(@worldVec2(new b2.Vec2(mouse.x, mouse.y)))
-
-      @debugDraw.SetSprite(@cq.context)
 
       @cq.clear()
       @cq.context.save()
@@ -58,11 +48,7 @@ define ['b2', 'utils'], (b2, Utils) ->
       @cq.fill()
 
       # @cq.context.globalCompositeOperation = "source-atop"
-      for body in @game.getBodies()
-        xf = body.m_xf
-        for fixture in @game.getFixturesOf(body)
-          shape = fixture.GetShape()
-          @drawShape(shape, xf, body.GetUserData()?.color() || "black")
+      @drawBody(body) for body in @game.getBodies()
 
       # draw all particles
       @cq.context.save()
@@ -72,6 +58,13 @@ define ['b2', 'utils'], (b2, Utils) ->
 
       # restore global context
       @cq.context.restore()
+
+    drawBody: (body) =>
+      xf = body.m_xf
+      color = body.GetUserData()?.color() || "black"
+      for fixture in @game.getFixturesOf(body)
+        shape = fixture.GetShape()
+        @drawShape(shape, xf, color)
 
     drawShape: (shape, xf, color) =>
       switch shape.m_type
