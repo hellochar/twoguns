@@ -22,8 +22,8 @@ require ['jquery', 'b2', 'socket.io', 'canvasquery', 'game/game', 'game/renderer
       @cq.appendTo("body")
       mouse.x = @cq.canvas.width/2
       mouse.y = @cq.canvas.height/2
-      @game = new Game(80, 20, 1)
-      @renderer = new Renderer(20, @cq)
+      @game = new Game(80, 20)
+      @renderer = new Renderer(20, @game, @cq)
 
       @stats = new Stats()
       @stats.setMode(0)

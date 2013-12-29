@@ -1,7 +1,8 @@
 define [
   'b2',
   'multi_contact_listener'
-], (b2, MultiContactListener) ->
+  'game/world/block_userdata'
+], (b2, MultiContactListener, BlockUserData) ->
 
 
   BLOCK_BODYDEF = new b2.BodyDef
@@ -20,7 +21,7 @@ define [
       this.b2World.apply(this, [gravity, allowSleep])
       @SetContactListener(new MultiContactListener())
       @createBoundingBoxes(@game.width, @game.height)
-      @generateNoiseBoxes(3, @game.gridSize)
+      @generateNoiseBoxes(3, 1)
 
     # noiseScalar:
     #   between 1 and 2 produces a dense maze-like structure (it seems that any 1 < n < 2 has the same characteristics)
@@ -40,7 +41,7 @@ define [
       BLOCK_BODYDEF.position.Set( x, y )
       block = @CreateBody(BLOCK_BODYDEF)
       fixture = block.CreateFixture(BLOCK_FIXDEF)
-      block.SetUserData("block")
+      block.SetUserData(new BlockUserData())
 
       block
 

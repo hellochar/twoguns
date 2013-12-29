@@ -3,11 +3,12 @@ define [
   'underscore',
   'b2',
   'stats',
+  'utils'
   'multi_contact_listener',
   'game/random',
   'game/player_body'
   'game/world/game_world'
-], ($, _, b2, Stats, MultiContactListener, Random, PlayerBody, GameWorld) ->
+], ($, _, b2, Stats, Utils, MultiContactListener, Random, PlayerBody, GameWorld) ->
   # model of the game
   #
   #   there is a physics world, with objects etc.
@@ -16,16 +17,8 @@ define [
   #   there is a win/lose condition
 
   class Game
-    BLOCK_BODYDEF = new b2.BodyDef
-    BLOCK_BODYDEF.type = b2.Body.b2_staticBody
 
-    BLOCK_FIXDEF = new b2.FixtureDef
-    BLOCK_FIXDEF.density = 1
-    BLOCK_FIXDEF.friction = 1
-    BLOCK_FIXDEF.restitution = 0
-    BLOCK_FIXDEF.shape = new b2.PolygonShape
-
-    constructor: (@width, @height, @gridSize, @random = new Random()) ->
+    constructor: (@width, @height, @random = new Random()) ->
       @world = new GameWorld(new b2.Vec2(0, 8), true, this)
 
       # create you
@@ -41,6 +34,12 @@ define [
 
     createBlock: (x, y, isStatic = true) =>
       @world.createBlock(x, y, isStatic)
+
+    # returns an array of bodies
+    getBodies: () =>
+      Utils.nextArray(@world.m_bodyList)
+
+    getFixturesOf: (body) => Utils.nextArray(body.GetFixtureList())
 
     # keysPressed = char (as a string) -> true
     # mouse = {location, button}

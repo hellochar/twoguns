@@ -5,7 +5,10 @@ define [
   'noise',
   'stats',
   'multi_contact_listener'
-], ($, _, b2, ClassicalNoise, Stats, MultiContactListener) ->
+  'game/world/block_userdata'
+  'game/world/bullet_userdata'
+  'game/world/player_userdata'
+], ($, _, b2, ClassicalNoise, Stats, MultiContactListener, BlockUserData, BulletUserData, PlayerUserData) ->
 
   BODYDEF = new b2.BodyDef
   BODYDEF.type = b2.Body.b2_dynamicBody
@@ -22,6 +25,7 @@ define [
   PlayerBody = {
     create: (game, height = 0.6, width = 0.2) =>
       body = game.world.CreateBody(BODYDEF)
+      body.SetUserData(new PlayerUserData())
 
       (->
         FIXDEF.shape.SetAsBox( width / 2, height / 2 )
@@ -93,7 +97,7 @@ define [
       direction = @directionTo(mouse.location)
       sightline = ( =>
         isect = @game.rayIntersect(@GetWorldCenter(), direction,
-          (fixture) -> fixture.GetBody().GetUserData() is "block"
+          (fixture) -> fixture.GetBody().GetUserData() instanceof BlockUserData
         )
         if isect
           return (cq) =>
@@ -107,23 +111,24 @@ define [
       )()
       @game.particles.push(sightline) if sightline
 
-      @game.makeVisionPoly = (cq) =>
-        cq.beginPath()
-        for angle in [0..Math.PI*2] by (Math.PI*2) / 200
-          dir = new b2.Vec2(Math.cos(angle), Math.sin(angle))
-          isect = @game.rayIntersect(@GetWorldCenter(), dir,
-            (fixture) => fixture.GetBody() isnt this and fixture.GetBody().GetUserData() isnt "bullet"
-          )
+    getVisionPoly: () ->
+      poly = []
+      for angle in [0..Math.PI*2] by (Math.PI*2) / 200
+        dir = new b2.Vec2(Math.cos(angle), Math.sin(angle))
+        isect = @game.rayIntersect(@GetWorldCenter(), dir,
+          (fixture) => fixture.GetBody() isnt this and not (fixture.GetBody().GetUserData() instanceof BulletUserData)
+        )
 
-          point = isect?.point
-          if not point
-            point = @GetWorldCenter().Copy()
-            offset = dir.Copy()
-            offset.Multiply(100)
-            point.Add(offset)
+        point = isect?.point
+        # either intersect or go out to 100 world units (longer than the screen length most likely)
+        if not point
+          point = @GetWorldCenter().Copy()
+          offset = dir.Copy()
+          offset.Multiply(100)
+          point.Add(offset)
+        poly.push(point)
+      return poly
 
-          cq.lineTo(point.x, point.y)
-        cq.fill()
 
 
     directionTo: (x, y) ->
@@ -154,6 +159,7 @@ define [
       bodyDef.linearVelocity.Multiply(BULLET_SPEED)
 
       body = @world.CreateBody(bodyDef)
+      body.SetUserData(new BulletUserData())
 
       fixDef = new b2.FixtureDef()
       fixDef.density = 0.0
@@ -163,7 +169,6 @@ define [
       fixDef.shape = new b2.CircleShape(.05)
 
       body.CreateFixture(fixDef)
-      body.SetUserData("bullet")
 
       $(body).on("begincontact", (evt, contact, myFixture, otherFixture) =>
         if contact.IsTouching()
@@ -173,7 +178,7 @@ define [
           )
           $(body).off("begincontact")
 
-          if otherFixture.GetBody().GetUserData() is "block"
+          if otherFixture.GetBody().GetUserData() instanceof BlockUserData
             if bulletType is "create"
               @game.delegates.push(=>@world.DestroyBody(otherFixture.GetBody()))
             else if bulletType is "destroy"

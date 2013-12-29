@@ -1,7 +1,7 @@
 define ['b2', 'utils'], (b2, Utils) ->
 
   class Renderer
-    constructor: (@viewportWidth, @cq) ->
+    constructor: (@viewportWidth, @game, @cq) ->
       @center = new b2.Vec2() # world coordinates
 
       # setup debug draw
@@ -30,11 +30,11 @@ define ['b2', 'utils'], (b2, Utils) ->
 
     scale: => @cq.canvas.width / @viewportWidth
 
-    render: (keysPressed, mouse, game) =>
-      game.world.SetDebugDraw(@debugDraw)
+    render: (keysPressed, mouse) =>
+      @game.world.SetDebugDraw(@debugDraw)
 
       # these two must go together in order to make @center.SetV work
-      @lookAt(game.you.GetPosition())
+      @lookAt(@game.you.GetPosition())
       @center.SetV(@worldVec2(new b2.Vec2(mouse.x, mouse.y)))
 
       @debugDraw.SetSprite(@cq.context)
@@ -42,41 +42,35 @@ define ['b2', 'utils'], (b2, Utils) ->
       @cq.clear()
       @cq.context.save()
 
+      # convert cq's transform into world coordinates
       @cq
       .translate(
         @cq.canvas.width/2 - @center.x * @scale(),
         @cq.canvas.height/2 - @center.y * @scale())
       .scale(@scale(), @scale())
-      .lineWidth(0.025).globalAlpha(0.5)
+      .lineWidth(0.025)
 
       @cq.fillStyle("#ffffff")
       # @cq.context.globalCompositeOperation = "source-over"
-      game.makeVisionPoly?(@cq)
+      # draw the vision poly in white
+      @cq.beginPath()
+      @cq.lineTo(point.x, point.y) for point in @game.you.getVisionPoly()
+      @cq.fill()
 
       # @cq.context.globalCompositeOperation = "source-atop"
-      game.world.DrawDebugData()
+      for body in @game.getBodies()
+        xf = body.m_xf
+        for fixture in @game.getFixturesOf(body)
+          shape = fixture.GetShape()
+          @drawShape(shape, xf, body.GetUserData()?.color() || "black")
 
-      # Utils.nextIterator game.world.m_bodyList, (b) =>
-      #    Utils.nextIterator b.GetFixtureList(), (f) =>
-      #      xf = b.m_xf
-      #      s = f.GetShape()
-      #      if (b.IsActive() == false)
-      #        color = [ 128, 128, 77 ]
-      #      else if (b.GetType() == b2.Body.b2_staticBody)
-      #        color = [ 128, 230, 128 ]
-      #      else if (b.GetType() == b2.Body.b2_kinematicBody)
-      #        color = [ 128, 128, 230 ]
-      #      else if (b.IsAwake() == false)
-      #        color = [ 153, 153, 153 ]
-      #      else
-      #        color = [ 230, 179, 179 ]
-      #      @drawShape(s, xf, color)
-
-      for particle in game.particles
-        @cq.context.save()
+      # draw all particles
+      @cq.context.save()
+      for particle in @game.particles
         particle(@cq)
-        @cq.context.restore()
+      @cq.context.restore()
 
+      # restore global context
       @cq.context.restore()
 
     drawShape: (shape, xf, color) =>
@@ -102,8 +96,8 @@ define ['b2', 'utils'], (b2, Utils) ->
       cy = center.y * drawScale
       s.moveTo(0, 0)
       s.beginPath()
-      s.strokeStyle = "rgba(#{color[0]}, #{color[1]}, #{color[2]}, #{@alpha}"
-      s.fillStyle = "rgba(#{color[0]}, #{color[1]}, #{color[2]}, #{@fillAlpha}"
+      s.strokeStyle = color
+      s.fillStyle = color
       s.arc(cx, cy, radius * drawScale, 0, Math.PI * 2, true)
       s.moveTo(cx, cy)
       s.lineTo((center.x + axis.x * radius) * drawScale, (center.y + axis.y * radius) * drawScale)
@@ -114,8 +108,8 @@ define ['b2', 'utils'], (b2, Utils) ->
     drawSolidPolygon: (vertices, color) =>
       s = @cq.context
       s.beginPath()
-      s.strokeStyle = "rgba(#{color[0]}, #{color[1]}, #{color[2]}, #{@alpha})"
-      s.fillStyle = "rgba(#{color[0]}, #{color[1]}, #{color[2]}, #{@fillAlpha})"
+      s.strokeStyle = color
+      s.fillStyle = color
       s.moveTo(vertices[0].x , vertices[0].y )
       s.lineTo(v.x , v.y) for v in vertices[1..]
       s.lineTo(vertices[0].x , vertices[0].y )
