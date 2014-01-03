@@ -55,6 +55,7 @@ define ['b2', 'utils'], (b2, Utils) ->
 
       # @cq.context.globalCompositeOperation = "source-atop"
       # @drawBody(body) for body in @game.getBodies()
+      # cull off-screen bodies
       @drawBody(body) for body in @game.getBodiesInAABB(@visibleAABB())
       # @game.world.QueryAABB(((fixture) => @drawBody(fixture.GetBody())), @visibleAABB())
 
@@ -68,7 +69,6 @@ define ['b2', 'utils'], (b2, Utils) ->
       @cq.context.restore()
 
     drawBody: (body) =>
-      # cull off-screen bodies
       method = body.GetUserData()?.draw || (defaultMethod) -> defaultMethod()
       method(=> @drawBodyDefault(body))
     drawBodyDefault: (body) =>

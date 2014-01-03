@@ -110,8 +110,13 @@ define [
           undefined
       )()
       @game.particles.push(sightline) if sightline
+      @calculateVisionPoly()
 
     getVisionPoly: () ->
+      return @visionPoly
+
+    # private
+    calculateVisionPoly: () ->
       poly = []
       for angle in [0..Math.PI*2] by (Math.PI*2) / 200
         dir = new b2.Vec2(Math.cos(angle), Math.sin(angle))
@@ -119,6 +124,7 @@ define [
           (fixture) => fixture.GetBody() isnt this and not (fixture.GetBody().GetUserData() instanceof BulletUserData),
           100
         )
+        isect?.fixture?.GetBody()?.GetUserData()?.visible = true
         point = isect?.point
         # either intersect or go out to 100 world units (longer than the screen length most likely)
         if not point
@@ -127,8 +133,7 @@ define [
           offset.Multiply(100)
           point.Add(offset)
         poly.push(point)
-      return poly
-
+      @visionPoly = poly
 
 
     directionTo: (x, y) ->

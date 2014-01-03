@@ -47,6 +47,8 @@ define [
     step: (keysPressed, mouse, delta) =>
       @particles = []
 
+      b.GetUserData()?.visible = false for b in @getBodies()
+
       @you.update(keysPressed, mouse)
 
       method() for method in @delegates
