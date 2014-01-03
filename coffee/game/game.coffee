@@ -58,6 +58,7 @@ define [
       @you.shootAt(location, {0: "create", 2: "destroy"}[button])
 
     rayIntersectAll: (start, dir, filter, length = 10000) =>
+      window.RAY_INVOCATIONS += 1
       arr = []
       point2 = start.Copy()
       offset = dir.Copy()
@@ -85,8 +86,8 @@ define [
     # dir: normalized direction of the ray
     # filter: function (fixture, point, normal, fraction) => boolean;
     #   only look at intersections that match this filter
-    rayIntersect: (start, dir, filter, length = 10000) =>
-      arr = @rayIntersectAll(start, dir, filter)
+    rayIntersect: (start, dir, filter, length = 100) =>
+      arr = @rayIntersectAll(start, dir, filter, length)
 
       if arr.length > 0
         _.min(arr, (obj) =>
@@ -96,6 +97,17 @@ define [
         )
       else
         undefined
+
+    getBodiesInAABB: (aabb) =>
+      arr = []
+      @world.QueryAABB(((fixture) => arr.push(fixture.GetBody())), aabb)
+      return arr
+
+    getWorldVertices: (singlePolygonBody) =>
+      xf = singlePolygonBody.m_xf
+      fixture = singlePolygonBody.GetFixtureList()
+      shape = fixture.GetShape()
+      return (b2.Math.MulX(xf, v) for v in shape.GetVertices())
 
 
   return Game

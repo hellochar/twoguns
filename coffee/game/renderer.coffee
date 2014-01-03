@@ -22,14 +22,20 @@ define ['b2', 'utils'], (b2, Utils) ->
 
       worldVec2
 
-    scale: => @cq.canvas.width / @viewportWidth
+    scale: () => @cq.canvas.width / @viewportWidth
+
+    visibleAABB: () =>
+      aabb = new b2.AABB()
+      aabb.lowerBound = @worldVec2(new b2.Vec2(0, 0))
+      aabb.upperBound = @worldVec2(new b2.Vec2(@cq.canvas.width, @cq.canvas.height))
+      return aabb
 
     render: (keysPressed, mouse) =>
       # these two must go together in order to make @center.SetV work
       @lookAt(@game.you.GetPosition())
       @center.SetV(@worldVec2(new b2.Vec2(mouse.x, mouse.y)))
 
-      @cq.clear()
+      @cq.clear("rgb(128, 128, 128)")
       @cq.context.save()
 
       # convert cq's transform into world coordinates
@@ -48,7 +54,9 @@ define ['b2', 'utils'], (b2, Utils) ->
       @cq.fill()
 
       # @cq.context.globalCompositeOperation = "source-atop"
-      @drawBody(body) for body in @game.getBodies()
+      # @drawBody(body) for body in @game.getBodies()
+      @drawBody(body) for body in @game.getBodiesInAABB(@visibleAABB())
+      # @game.world.QueryAABB(((fixture) => @drawBody(fixture.GetBody())), @visibleAABB())
 
       # draw all particles
       @cq.context.save()
@@ -60,6 +68,10 @@ define ['b2', 'utils'], (b2, Utils) ->
       @cq.context.restore()
 
     drawBody: (body) =>
+      # cull off-screen bodies
+      method = body.GetUserData()?.draw || (defaultMethod) -> defaultMethod()
+      method(=> @drawBodyDefault(body))
+    drawBodyDefault: (body) =>
       xf = body.m_xf
       color = body.GetUserData()?.color() || "black"
       for fixture in @game.getFixturesOf(body)

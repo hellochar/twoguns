@@ -41,7 +41,7 @@ define [
       BLOCK_BODYDEF.position.Set( x, y )
       block = @CreateBody(BLOCK_BODYDEF)
       fixture = block.CreateFixture(BLOCK_FIXDEF)
-      block.SetUserData(new BlockUserData())
+      block.SetUserData(new BlockUserData(block))
 
       block
 

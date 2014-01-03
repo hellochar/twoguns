@@ -17,6 +17,7 @@
     "grunt-contrib-watch": "~0.5.2",
     "grunt-nodemon": "~0.1.0",
     "grunt-concurrent": "~0.3.0",
-    "maybe": "0.0.2"
+    "maybe": "0.0.2",
+    "jasmine-node": "~1.12.0"
   }
 }

@@ -23,30 +23,40 @@ require ['jquery', 'b2', 'socket.io', 'canvasquery', 'game/game', 'game/renderer
       mouse.x = @cq.canvas.width/2
       mouse.y = @cq.canvas.height/2
       @game = new Game(80, 20)
-      @renderer = new Renderer(20, @game, @cq)
+      @renderer = new Renderer(18, @game, @cq)
 
-      @stats = new Stats()
-      @stats.setMode(0)
+      @statsStep = new Stats()
+      @statsStep.setMode(0)
+      @statsStep.domElement.style.position = 'absolute'
+      @statsStep.domElement.style.left = '0px'
+      @statsStep.domElement.style.top = '0px'
 
-      @stats.domElement.style.position = 'absolute'
-      @stats.domElement.style.left = '0px'
-      @stats.domElement.style.top = '0px'
+      @statsRender = new Stats()
+      @statsRender.setMode(0)
+      @statsRender.domElement.style.position = 'absolute'
+      @statsRender.domElement.style.left = '0px'
+      @statsRender.domElement.style.top = '50px'
 
-      document.body.appendChild( @stats.domElement )
+      document.body.appendChild( @statsStep.domElement )
+      document.body.appendChild( @statsRender.domElement )
 
     # game logic loop
     onStep: (delta, time) ->
-      @stats.begin()
+      @statsStep.begin()
       mouseWorld = {
         location: @renderer.worldVec2(new b2.Vec2(mouse.x, mouse.y))
         button: mouse.button
       }
       @game.step(keysPressed, mouseWorld, delta)
-      @stats.end()
+      @statsStep.end()
+      console.log("rayIntersectAll called #{ window.RAY_INVOCATIONS } times!")
+      window.RAY_INVOCATIONS = 0
 
     # rendering loop
     onRender: (delta, time) ->
+      @statsRender.begin()
       @renderer.render(keysPressed, mouse, @game)
+      @statsRender.end()
 
     # window resize
     onResize: (width, height) ->

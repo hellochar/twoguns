@@ -119,7 +119,6 @@ define [
           (fixture) => fixture.GetBody() isnt this and not (fixture.GetBody().GetUserData() instanceof BulletUserData),
           100
         )
-
         point = isect?.point
         # either intersect or go out to 100 world units (longer than the screen length most likely)
         if not point

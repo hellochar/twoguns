@@ -20,10 +20,6 @@
     user-select: none;
 }
 
-canvas {
-    background: rgba(0, 0, 0, 0.5);
-}
-
 html,
 button,
 input,
