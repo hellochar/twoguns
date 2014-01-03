@@ -55,8 +55,12 @@ define [
 
         @bullets = []
 
+
         for methodName, impl of pbMethods
           @[methodName] = impl.bind(@)
+
+
+        @calculateVisionPoly()
       ).bind(body)()
       return body
   }
@@ -101,7 +105,7 @@ define [
         )
         if isect
           return (cq) =>
-            cq.fillStyle("red").circle(isect.point.x, isect.point.y, 0.05).fill()
+            cq.fillStyle("red").beginPath().circle(isect.point.x, isect.point.y, 0.05).fill()
             cq.strokeStyle("red").beginPath().
               moveTo(@GetWorldCenter().x, @GetWorldCenter().y).
               lineTo(isect.point.x, isect.point.y).
