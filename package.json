@@ -19,5 +19,8 @@
     "grunt-concurrent": "~0.3.0",
     "maybe": "0.0.2",
     "jasmine-node": "~1.12.0"
+  },
+  "dependencies": {
+    "browserify": "~3.18.0"
   }
 }
