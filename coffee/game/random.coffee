@@ -1,10 +1,15 @@
 define [
+  'seedrandom'
   'noise'
-], (ClassicalNoise) ->
+], (seedrandom, ClassicalNoise) ->
 
   class Random
-    constructor: () ->
-      @perlinNoise = new ClassicalNoise()
+    constructor: (seed = 0) ->
+      rng = seedrandom(seed)
+      @myRandom = {
+        random: () -> rng()
+      }
+      @perlinNoise = new ClassicalNoise(@myRandom)
 
     perlin: (x, y, z) =>
       @perlinNoise.noise(x, y, z)

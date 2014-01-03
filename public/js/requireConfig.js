@@ -8,6 +8,7 @@ var require = {
         canvasquery: ['vendor/canvasquery'],
         noise: ['vendor/noise'],
         stats: ['vendor/stats'],
+        seedrandom: ['vendor/seedrandom'],
         underscore: ['vendor/underscore'],
         maybe: 'vendor/maybe',
     },
