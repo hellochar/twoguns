@@ -32,23 +32,46 @@ Multiplayer shooting platformer with destructible terrain
         killing all the blocks kills the player
         or perhaps there's a "heart" block that you must destroy
 - Game loop
-    - Look at input state
-    - Take actions according to state
+    1. Look at input state
+    1. Take actions according to state
         - Move or jump method calls
         - Set looking
+        - set other features needed for rendering
+    - (wait for input from other players)
+    - "pre"-b2world-step: apply forces, etc.
+    - b2world step
+    - post-b2world-step: calculate vision, etc.
+    - render here
 - fog of war
+    - explicit line of sight
+    - "remember" the last time you saw blocks
+    - see all blocks being created/destroyed, but only fog of war players?
+    - pixel perfect masking of the visible poly?
+        - you should definitely be able to see the layout in general
+        - even if you can't see *directly* into the blocks, it should show them at least some
+- rendering
+    - shader to make blocks look interesting
+    - masking the visible area
+
+## style
+- visual style
+    - cave environment
+    - parallax procedurally generated backgrounds
+    - blues, dark colors, some whites/grays
+    - ![](http://blog.frogatto.com/wp-content/uploads/2010/03/cave-background-demo.png)Background has good gradients
+    - ![](http://ramnation.files.wordpress.com/2011/01/cave-interior-layout-design-entrance-nb.jpg)
+    - ![](http://fc06.deviantart.net/fs70/f/2012/354/7/1/ice_cave_by_tatchit-d55zi1g.png)
+    - ![](http://4.bp.blogspot.com/-ZQRlnDSXDY0/Uazxv1a495I/AAAAAAAAAbI/AQGQ3CXqJOg/s640/ice+cave2.jpg)
+    - ![](http://www.blackorchard.co.uk/img/aggro_cave4c.jpg)
+    - ![](http://static.gamesradar.com/images/mb/GamesRadar/us/Features/2009/12/Sonic%20and%20Mario%20rereviewed/Cave%206--article_image.jpg)
+- more realistic, sharp distinctions between objects
+- simplistic looking graphics; no toonish looking shit
+- shouldn't be obvious textures are being used
+    - that is, make it look like something generative
 
 ## bugs
-- <s>bullets shouldn't obey gravity</s>
 
 ### Supporting
-- <s>Write code in coffeescript and auto-compile to public/</s>
-    - <s>(delete old .js files when their .coffee gets removed)</s>
-- <s>watched updating (recompile coffee automatically when it changes)</s>
-    - <s>only recompile the file that was changed</s>
-- <s>Auto-refreshing of page when coffee files change</s>
-- <s>Generic task for development: start server, compile, watch</s>
-    - (this is the default task)
 - Reload on requireConfig change
 - reload when app.js changes
 
