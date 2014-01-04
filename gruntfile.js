@@ -2,9 +2,14 @@
 
 module.exports = function(grunt) {
 
+    var path = require('path');
+
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
-        clean: ['compiled/js/'],
+        clean: {
+            options: {force: true},
+            compiled: ['compiled/js/'],
+        },
         coffee: {
             all: {
                 files: [{
@@ -63,18 +68,25 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-concurrent');
     grunt.loadNpmTasks('grunt-nodemon');
 
-    grunt.event.on('watch', function(action, filepath) {
+    grunt.event.on('watch', function(action, filepathString) {
 
-        var js_filepath = filepath.replace(/coffee\/(.*)\.coffee/, "compiled/js/$1.js");
+        //should be of the form [coffee, dir1, dir2, ... file.coffee]
+        var pathComponents = filepathString.split(path.sep)
+
+        var jsPathComponents = ["compiled", "js"]
+        jsPathComponents.push.apply(jsPathComponents, pathComponents.slice(1, -1))
+        var new_filename = path.basename(filepathString, ".coffee") + ".js";
+        jsPathComponents.push(new_filename);
+        var js_filepath = jsPathComponents.join(path.sep)
 
         if(action == 'deleted') {
             console.log("deleting", js_filepath);
             grunt.file.delete(js_filepath);
         } else {
-            grunt.config(['coffee', 'singleFile', 'src'], filepath);
+            grunt.config(['coffee', 'singleFile', 'src'], filepathString);
             grunt.config(['coffee', 'singleFile', 'dest'], js_filepath);
         }
     });
 
-    grunt.registerTask('default', ['clean', 'coffee:all', 'concurrent:dev']);
+    grunt.registerTask('default', ['clean:compiled', 'coffee:all', 'concurrent:dev']);
 }
