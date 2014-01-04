@@ -107,25 +107,6 @@ define [
       )()
       @game.particles.push(sightline) if sightline
 
-      @game.makeVisionPoly = (cq) =>
-        cq.beginPath()
-        for angle in [0..Math.PI*2] by (Math.PI*2) / 200
-          dir = new b2.Vec2(Math.cos(angle), Math.sin(angle))
-          isect = @world.rayIntersect(@GetWorldCenter(), dir,
-            (fixture) => fixture.GetBody() isnt this and fixture.GetBody().GetUserData() isnt "bullet"
-          )
-
-          point = isect?.point
-          if not point
-            point = @GetWorldCenter().Copy()
-            offset = dir.Copy()
-            offset.Multiply(100)
-            point.Add(offset)
-
-          cq.lineTo(point.x, point.y)
-        cq.fill()
-
-
     directionTo: (x, y) ->
       if "x" of x and "y" of x and y == undefined
         {x: x, y: y} = x
@@ -190,7 +171,30 @@ define [
 
       @bullets.push(body)
 
+    getVisionInfo: ->
+      visibleBlocks = []
+      visionPolygon = []
 
+      for angle in [0..Math.PI*2] by (Math.PI*2) / 500
+        dir = new b2.Vec2(Math.cos(angle), Math.sin(angle))
+        isect = @world.rayIntersect(@GetWorldCenter(), dir,
+          (fixture) => fixture.GetBody() isnt this and fixture.GetBody().GetUserData() isnt "bullet"
+        )
+
+        point = isect?.point
+        visibleBlocks.push(isect.fixture.GetBody()) if isect
+        if not point
+          point = @GetWorldCenter().Copy()
+          offset = dir.Copy()
+          offset.Multiply(100)
+          point.Add(offset)
+
+        visionPolygon.push(point)
+      visibleBlocks = _.flatten(visibleBlocks)
+      return {
+        visibleBlocks: visibleBlocks
+        visionPolygon: visionPolygon
+      }
   }
 
   return PlayerBody
