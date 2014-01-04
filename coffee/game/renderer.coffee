@@ -33,9 +33,7 @@ define ['b2', 'utils'], (b2, Utils) ->
       return aabb
 
     render: (keysPressed, mouse) =>
-      # these two must go together in order to make @center.SetV work
-      @lookAt(@game.you.GetPosition())
-      @center.SetV(@worldVec2(new b2.Vec2(mouse.x, mouse.y)))
+      @game.youPlayer.lookAt(this, mouse)
 
       @cq.clear("rgb(128, 128, 128)")
       @cq.context.save()
@@ -62,7 +60,7 @@ define ['b2', 'utils'], (b2, Utils) ->
       # @cq.context.globalCompositeOperation = "source-over"
       # draw the vision poly in white
       @cq.beginPath()
-      @cq.lineTo(point.x, point.y) for point in @game.you.getVisionPoly()
+      @cq.lineTo(point.x, point.y) for point in @game.youPlayer.getVisionPoly()
       @cq.fill()
 
       # @cq.context.globalCompositeOperation = "source-atop"

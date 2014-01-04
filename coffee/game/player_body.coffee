@@ -73,53 +73,6 @@ define [
     canJump: ->
       @jumpCounter > 0
 
-    update: () ->
-      keysPressed = @player.keysPressed
-      mouse = @player.mouse
-      IMPULSE_JUMP = new b2.Vec2(0, -0.04 / @GetMass())
-      FORCE_WALK_X = 4.0
-      # FORCE_FLY = new b2.Vec2(0, -0.8 * @world.GetGravity().y)
-      FORCE_FLY = new b2.Vec2(0, -0.8)
-      loc = @GetWorldCenter().Copy()
-
-      if 'w' of keysPressed and @canJump()
-        @ApplyImpulse(IMPULSE_JUMP, loc)
-
-      if 'w' of keysPressed
-        @ApplyForce(FORCE_FLY, loc)
-
-      vel = @GetLinearVelocity()
-
-      if 'a' of keysPressed
-        @SetLinearVelocity(new b2.Vec2(-FORCE_WALK_X, vel.y))
-      else if 'd' of keysPressed
-        @SetLinearVelocity(new b2.Vec2(FORCE_WALK_X, vel.y))
-      else
-        @SetLinearVelocity(new b2.Vec2(0, vel.y))
-
-      if 's' of keysPressed
-        @ApplyImpulse(new b2.Vec2(0, IMPULSE_JUMP / 10), loc)
-
-      bullet.ApplyForce(@world.GetGravity().GetNegative(), bullet.GetWorldCenter()) for bullet in @bullets
-
-      direction = @directionTo(mouse.location)
-      sightline = ( =>
-        isect = @game.rayIntersect(@GetWorldCenter(), direction,
-          (fixture) -> fixture.GetBody().GetUserData() instanceof BlockUserData
-        )
-        if isect
-          return (cq) =>
-            cq.fillStyle("red").beginPath().circle(isect.point.x, isect.point.y, 0.035).fill()
-            cq.strokeStyle("red").beginPath().
-              moveTo(@GetWorldCenter().x, @GetWorldCenter().y).
-              lineTo(isect.point.x, isect.point.y).
-              stroke()
-        else
-          undefined
-      )()
-      @game.particles.push(sightline) if sightline
-      @calculateVisionPoly()
-
     getVisionPoly: () ->
       return @visionPoly
 

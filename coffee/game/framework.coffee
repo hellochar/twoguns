@@ -16,8 +16,7 @@ define [ 'b2', 'canvasquery', 'game/game', 'game/player', 'game/renderer'], (b2,
       @cq.appendTo("body")
       mouse.x = @cq.canvas.width/2
       mouse.y = @cq.canvas.height/2
-      @you = new Player(yourName)
-      @game = new Game(80, 20, @you)
+      @game = new Game(80, 20, yourName)
       @renderer = new Renderer(18, @game, @cq)
 
       @statsStep = new Stats()
@@ -42,8 +41,9 @@ define [ 'b2', 'canvasquery', 'game/game', 'game/player', 'game/renderer'], (b2,
         location: @renderer.worldVec2(new b2.Vec2(mouse.x, mouse.y))
         button: mouse.button
       }
-      @you.mouse = mouseWorld
-      @you.keysPressed = keysPressed # CAREFUL, same reference
+      # this is a hack and will be replaced once network code gets here
+      @game.youPlayer.mouse = mouseWorld
+      @game.youPlayer.keysPressed = keysPressed # CAREFUL, same reference
       @game.step(delta)
       @statsStep.end()
 

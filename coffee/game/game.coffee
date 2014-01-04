@@ -5,10 +5,11 @@ define [
   'stats',
   'utils'
   'multi_contact_listener',
+  'game/player'
   'game/random',
   'game/player_body'
   'game/world/game_world'
-], ($, _, b2, Stats, Utils, MultiContactListener, Random, PlayerBody, GameWorld) ->
+], ($, _, b2, Stats, Utils, MultiContactListener, Player, Random, PlayerBody, GameWorld) ->
   # model of the game
   #
   #   there is a physics world, with objects etc.
@@ -17,13 +18,10 @@ define [
   #   there is a win/lose condition
 
   class Game
-    constructor: (@width, @height, @youPlayer, @random = new Random()) ->
+    constructor: (@width, @height, yourName, @random = new Random()) ->
       @world = new GameWorld(new b2.Vec2(0, 8), true, this)
 
-      @youPlayer.game = @
-
-      # create you
-      @you = PlayerBody.create(@youPlayer)
+      @youPlayer = new Player(yourName, this)
 
       # callbacks to be invoked right before the game steps
       # Use this to e.g. add and remove blocks that you can't do during
@@ -40,6 +38,7 @@ define [
     getBodies: () =>
       Utils.nextArray(@world.m_bodyList)
 
+    # returns an array of fixtures for the given Body
     getFixturesOf: (body) => Utils.nextArray(body.GetFixtureList())
 
     # delta = number of ms since the last call to step
@@ -48,7 +47,7 @@ define [
 
       b.GetUserData()?.visible = false for b in @getBodies()
 
-      @you.update()
+      @youPlayer.update()
 
       method() for method in @delegates
       @delegates = []
@@ -56,7 +55,7 @@ define [
       @world.ClearForces()
 
     mouseDown: (location, button) =>
-      @you.shootAt(location, {0: "create", 2: "destroy"}[button])
+      @youPlayer.shootAt(location, {0: "create", 2: "destroy"}[button])
 
     rayIntersectAll: (start, dir, filter, length = 10000) =>
       arr = []
