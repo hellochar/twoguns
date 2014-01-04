@@ -25,14 +25,7 @@ require ['jquery', 'b2', 'socket.io', 'canvasquery', 'game/game', 'game/renderer
       @game = new Game(80, 20, 1)
       @renderer = new Renderer(20, @cq)
 
-      @stats = new Stats()
-      @stats.setMode(0)
-
-      @stats.domElement.style.position = 'absolute'
-      @stats.domElement.style.left = '0px'
-      @stats.domElement.style.top = '0px'
-
-      document.body.appendChild( @stats.domElement )
+      @setupStats()
 
     # game logic loop
     onStep: (delta, time) ->
@@ -75,6 +68,16 @@ require ['jquery', 'b2', 'socket.io', 'canvasquery', 'game/game', 'game/renderer
       keysPressed[key] = true
     onKeyUp: (key) ->
       delete keysPressed[key]
+    setupStats: () ->
+      @stats = new Stats()
+      @stats.setMode(0)
+
+      @stats.domElement.style.position = 'absolute'
+      @stats.domElement.style.left = '0px'
+      @stats.domElement.style.top = '0px'
+
+      document.body.appendChild( @stats.domElement )
+
   }
 
   framework.setup()
