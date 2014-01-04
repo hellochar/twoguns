@@ -49,8 +49,6 @@ require ['jquery', 'b2', 'socket.io', 'canvasquery', 'game/game', 'game/renderer
       }
       @game.step(keysPressed, mouseWorld, delta)
       @statsStep.end()
-      console.log("rayIntersectAll called #{ window.RAY_INVOCATIONS } times!")
-      window.RAY_INVOCATIONS = 0
 
     # rendering loop
     onRender: (delta, time) ->

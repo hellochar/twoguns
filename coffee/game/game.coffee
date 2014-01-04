@@ -60,7 +60,6 @@ define [
       @you.shootAt(location, {0: "create", 2: "destroy"}[button])
 
     rayIntersectAll: (start, dir, filter, length = 10000) =>
-      window.RAY_INVOCATIONS += 1
       arr = []
       point2 = start.Copy()
       offset = dir.Copy()
