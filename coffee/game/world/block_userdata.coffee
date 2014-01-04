@@ -3,7 +3,7 @@ define [
   class BlockUserData
     constructor: (@body) ->
 
-    draw: (defaultMethod) =>
+    draw: (renderer, defaultMethod) =>
       defaultMethod() if @visible
 
     color: () => "green"

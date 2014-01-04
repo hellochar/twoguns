@@ -17,12 +17,13 @@ define [
   #   there is a win/lose condition
 
   class Game
-
-    constructor: (@width, @height, @random = new Random()) ->
+    constructor: (@width, @height, @youPlayer, @random = new Random()) ->
       @world = new GameWorld(new b2.Vec2(0, 8), true, this)
 
+      @youPlayer.game = @
+
       # create you
-      @you = PlayerBody.create(@)
+      @you = PlayerBody.create(@youPlayer)
 
       # callbacks to be invoked right before the game steps
       # Use this to e.g. add and remove blocks that you can't do during

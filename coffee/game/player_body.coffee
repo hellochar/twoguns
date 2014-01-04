@@ -23,9 +23,9 @@ define [
   FIXDEF.shape = new b2.PolygonShape
 
   PlayerBody = {
-    create: (game, height = 0.6, width = 0.2) =>
+    create: (player, height = 0.6, width = 0.2) =>
+      game = player.game
       body = game.world.CreateBody(BODYDEF)
-      body.SetUserData(new PlayerUserData())
 
       (->
         FIXDEF.shape.SetAsBox( width / 2, height / 2 )
@@ -42,6 +42,7 @@ define [
         ])
         @feet = @CreateFixture(FIXDEF)
 
+        @player = player
         @game = game
         @world = @game.world
 
@@ -62,6 +63,7 @@ define [
 
         @calculateVisionPoly()
       ).bind(body)()
+      body.SetUserData(new PlayerUserData(body))
       return body
   }
 
@@ -105,7 +107,7 @@ define [
         )
         if isect
           return (cq) =>
-            cq.fillStyle("red").beginPath().circle(isect.point.x, isect.point.y, 0.05).fill()
+            cq.fillStyle("red").beginPath().circle(isect.point.x, isect.point.y, 0.035).fill()
             cq.strokeStyle("red").beginPath().
               moveTo(@GetWorldCenter().x, @GetWorldCenter().y).
               lineTo(isect.point.x, isect.point.y).

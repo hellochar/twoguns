@@ -46,7 +46,8 @@ define ['b2', 'utils'], (b2, Utils) ->
         @cq.canvas.width/2 - @center.x * @scale(),
         @cq.canvas.height/2 - @center.y * @scale())
       .scale(@scale(), @scale())
-      .lineWidth(0.025)
+      .lineWidth(1 / @scale())
+
       @cq.context.save()
       @cq.scale(.2, .2)
       @cq.translate(@center.x * 1, @center.y * 1)
@@ -80,8 +81,7 @@ define ['b2', 'utils'], (b2, Utils) ->
       @cq.context.restore()
 
     drawBody: (body) =>
-      method = body.GetUserData()?.draw || (defaultMethod) -> defaultMethod()
-      method(=> @drawBodyDefault(body))
+      body.GetUserData()?.draw(this, => @drawBodyDefault(body))
     drawBodyDefault: (body) =>
       xf = body.m_xf
       color = body.GetUserData()?.color() || "black"
