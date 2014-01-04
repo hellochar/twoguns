@@ -87,4 +87,7 @@ require ['jquery', 'b2', 'socket.io', 'canvasquery', 'game/game', 'game/renderer
       delete keysPressed[key]
   }
 
-  framework.setup()
+
+  $(() ->
+    framework.setup()
+  )
