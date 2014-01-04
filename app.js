@@ -10,6 +10,7 @@ app.configure(function() {
     app.use(express.static(__dirname + '/compiled'));
 });
 
+io.set('log level', 2);
 
 server.listen(PORT);
 
