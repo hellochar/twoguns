@@ -3,6 +3,8 @@ define ['b2', 'utils'], (b2, Utils) ->
   class Renderer
     constructor: (@viewportWidth, @game, @cq) ->
       @center = new b2.Vec2() # world coordinates
+      @bgImage = new Image()
+      @bgImage.src = 'img/bg.jpg'
 
     lookAt: (center) => @center.SetV(center)
 
@@ -45,8 +47,17 @@ define ['b2', 'utils'], (b2, Utils) ->
         @cq.canvas.height/2 - @center.y * @scale())
       .scale(@scale(), @scale())
       .lineWidth(0.025)
+      @cq.context.save()
+      @cq.scale(.2, .2)
+      @cq.translate(@center.x * 1, @center.y * 1)
+      @cq.drawImage(@bgImage, -400, -420)
+      @cq.context.save()
+      @cq.context.setTransform(1, 0, 0, 1, 0, 0)
+      @cq.clear("rgba(0, 0, 0, .5)")
+      @cq.context.restore()
+      @cq.context.restore()
 
-      @cq.fillStyle("#ffffff")
+      @cq.fillStyle("rgba(255, 255, 255, .8)")
       # @cq.context.globalCompositeOperation = "source-over"
       # draw the vision poly in white
       @cq.beginPath()
