@@ -81,7 +81,7 @@ define [
       if 'w' of keysPressed and @canJump()
         @ApplyImpulse(IMPULSE_JUMP, loc)
 
-      if 'space' of keysPressed
+      if 'w' of keysPressed
         @ApplyForce(FORCE_FLY, loc)
 
       vel = @GetLinearVelocity()
