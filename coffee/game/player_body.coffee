@@ -73,7 +73,9 @@ define [
     canJump: ->
       @jumpCounter > 0
 
-    update: (keysPressed, mouse) ->
+    update: () ->
+      keysPressed = @player.keysPressed
+      mouse = @player.mouse
       IMPULSE_JUMP = new b2.Vec2(0, -0.04 / @GetMass())
       FORCE_WALK_X = 4.0
       # FORCE_FLY = new b2.Vec2(0, -0.8 * @world.GetGravity().y)

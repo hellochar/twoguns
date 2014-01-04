@@ -42,15 +42,13 @@ define [
 
     getFixturesOf: (body) => Utils.nextArray(body.GetFixtureList())
 
-    # keysPressed = char (as a string) -> true
-    # mouse = {location, button}
     # delta = number of ms since the last call to step
-    step: (keysPressed, mouse, delta) =>
+    step: (delta) =>
       @particles = []
 
       b.GetUserData()?.visible = false for b in @getBodies()
 
-      @you.update(keysPressed, mouse)
+      @you.update()
 
       method() for method in @delegates
       @delegates = []
