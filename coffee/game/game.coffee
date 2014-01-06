@@ -54,9 +54,6 @@ define [
       @world.Step(delta / 1000, 10, 10)
       @world.ClearForces()
 
-    mouseDown: (location, button) =>
-      @youPlayer.shootAt(location, {0: "create", 2: "destroy"}[button])
-
     rayIntersectAll: (start, dir, filter, length = 10000) =>
       arr = []
       point2 = start.Copy()

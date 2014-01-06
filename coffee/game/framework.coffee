@@ -1,11 +1,12 @@
-define [ 'b2', 'canvasquery', 'game/game', 'game/player', 'game/renderer'], (b2, cq, Game, Player, Renderer) ->
-
-  keysPressed = {} # key1: true, key2: true, key3: true
-  mouse = {
-    x : 0,
-    y : 0, # pixel coordinates of mouse relative to top-left of canvas
-    button : -1, # -1,0,1,2 === not-pressed, left, middle, right
-  }
+define [
+  'underscore'
+  'b2'
+  'canvasquery'
+  'game/game'
+  'game/inputs'
+  'game/player'
+  'game/render/renderer'
+], (_, b2, cq, Game, Inputs, Player, Renderer) ->
 
   # The framework hooks the renderer and game model together, and also handles events
   # Events make the core of the framework. You can think of the game as just being a bunch of events happening, and responding accordingly
@@ -14,8 +15,10 @@ define [ 'b2', 'canvasquery', 'game/game', 'game/player', 'game/renderer'], (b2,
     setup : (yourName) ->
       @cq = cq().framework(this, this)
       @cq.appendTo("body")
-      mouse.x = @cq.canvas.width/2
-      mouse.y = @cq.canvas.height/2
+      @input = new Inputs(
+        {x: @cq.canvas.width/2, y: @cq.canvas.height/2},
+        {}
+      )
       @game = new Game(80, 20, yourName)
       @renderer = new Renderer(18, @game, @cq)
 
@@ -37,20 +40,23 @@ define [ 'b2', 'canvasquery', 'game/game', 'game/player', 'game/renderer'], (b2,
     # game logic loop
     onStep: (delta, time) ->
       @statsStep.begin()
-      mouseWorld = {
-        location: @renderer.worldVec2(new b2.Vec2(mouse.x, mouse.y))
-        button: mouse.button
-      }
-      # this is a hack and will be replaced once network code gets here
-      @game.youPlayer.mouse = mouseWorld
-      @game.youPlayer.keysPressed = keysPressed # CAREFUL, same reference
+      playerInputs = @input.clone()
+
+      # it's a hack to put input logic copying here and will be replaced once network code gets here
+      playerInputs.mouse.location = @renderer.worldVec2(new b2.Vec2(@input.mouse.x, @input.mouse.y))
+      delete playerInputs.mouse.x
+      delete playerInputs.mouse.y
+
+      @game.youPlayer.inputs = playerInputs
       @game.step(delta)
+
+      @input.mouse.down = false
       @statsStep.end()
 
     # rendering loop
     onRender: (delta, time) ->
       @statsRender.begin()
-      @renderer.render(keysPressed, mouse, @game)
+      @renderer.render(@input.mouse.x, @input.mouse.y)
       @statsRender.end()
 
     # window resize
@@ -63,23 +69,17 @@ define [ 'b2', 'canvasquery', 'game/game', 'game/player', 'game/renderer'], (b2,
 
     # mouse and touch events
     onMouseDown: (x, y, button) ->
-      mouse.button = button
-      mouse.x = x
-      mouse.y = y
-      @game.mouseDown(@renderer.worldVec2(new b2.Vec2(x, y)), button)
+      @input.mousedown(x, y, button)
     onMouseUp: (x, y, button) ->
-      mouse.button = -1
-      mouse.x = x
-      mouse.y = y
+      @input.mouseup(x, y, button)
     onMouseMove: (x, y) ->
-      mouse.x = x
-      mouse.y = y
+      @input.setLocation(x, y)
 
     # keyboard events
     onKeyDown: (key) ->
-      keysPressed[key] = true
+      @input.keys[key] = true
     onKeyUp: (key) ->
-      delete keysPressed[key]
+      delete @input.keys[key]
   }
 
   return framework

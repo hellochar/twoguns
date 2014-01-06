@@ -1,4 +1,4 @@
-define ['b2', 'utils', 'game/image_cache'], (b2, Utils, ImageCache) ->
+define ['b2', 'utils', 'game/render/image_cache'], (b2, Utils, ImageCache) ->
 
   class Renderer
     constructor: (@viewportWidth, @game, @cq) ->
@@ -30,8 +30,9 @@ define ['b2', 'utils', 'game/image_cache'], (b2, Utils, ImageCache) ->
       aabb.upperBound = @worldVec2(new b2.Vec2(@cq.canvas.width, @cq.canvas.height))
       return aabb
 
-    render: (keysPressed, mouse) =>
-      @game.youPlayer.lookAt(this, mouse)
+    #mouse x and y in screen coordinates; still needed for now but should be removed soon
+    render: (mx, my) =>
+      @game.youPlayer.lookAt(this, mx, my)
 
       @cq.clear("rgb(128, 128, 128)")
       @cq.context.save()
