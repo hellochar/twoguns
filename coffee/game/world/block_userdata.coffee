@@ -8,4 +8,6 @@ define [
 
     color: () => "green"
 
+    image: () => "img/block.png"
+
   return BlockUserData

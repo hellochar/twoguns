@@ -1,10 +1,8 @@
-define ['b2', 'utils'], (b2, Utils) ->
+define ['b2', 'utils', 'game/image_cache'], (b2, Utils, ImageCache) ->
 
   class Renderer
     constructor: (@viewportWidth, @game, @cq) ->
       @center = new b2.Vec2() # world coordinates
-      @bgImage = new Image()
-      @bgImage.src = 'img/bg.jpg'
 
     lookAt: (center) => @center.SetV(center)
 
@@ -49,7 +47,7 @@ define ['b2', 'utils'], (b2, Utils) ->
       @cq.context.save()
       @cq.scale(.2, .2)
       @cq.translate(@center.x * 1, @center.y * 1)
-      @cq.drawImage(@bgImage, -400, -420)
+      @cq.drawImage(ImageCache.get('img/bg.jpg'), -400, -420)
       @cq.context.save()
       @cq.context.setTransform(1, 0, 0, 1, 0, 0)
       @cq.clear("rgba(0, 0, 0, .5)")
@@ -80,6 +78,7 @@ define ['b2', 'utils'], (b2, Utils) ->
 
     drawBody: (body) =>
       body.GetUserData()?.draw(this, => @drawBodyDefault(body))
+
     drawBodyDefault: (body) =>
       xf = body.m_xf
       color = body.GetUserData()?.color() || "black"
