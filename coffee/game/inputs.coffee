@@ -30,6 +30,13 @@ define [
       @mouse.button = -1
       @mouse.down = false
 
+    serialize: () =>
+      JSON.stringify(this)
+
+    @unserialize: (string) =>
+      {mouse: mouse, keys: keys} = JSON.parse(string)
+      new Inputs(mouse, keys)
+
     pressed: (key) =>
       key of @keys
 

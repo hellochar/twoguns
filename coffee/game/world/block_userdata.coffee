@@ -4,7 +4,7 @@ define [
     constructor: (@body) ->
 
     draw: (renderer, defaultMethod) =>
-      defaultMethod() if @visible
+      defaultMethod()
 
     color: () => "green"
 

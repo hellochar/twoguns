@@ -18,10 +18,16 @@ define [
   #   there is a win/lose condition
 
   class Game
-    constructor: (@width, @height, yourName, @random = new Random()) ->
+    constructor: (@width, @height, playerNames, yourName, @random = new Random()) ->
+      @entities = []
       @world = new GameWorld(new b2.Vec2(0, 8), true, this)
+      @frame = 0
 
-      @youPlayer = new Player(yourName, this)
+      @players = (new Player(name, this) for name in playerNames)
+      @youPlayer = ( =>
+        yourIndex = playerNames.indexOf(yourName)
+        @players[yourIndex]
+      )()
 
       # callbacks to be invoked right before the game steps
       # Use this to e.g. add and remove blocks that you can't do during
@@ -30,6 +36,89 @@ define [
 
       # particles are methods that get the rendering context passed to them so they can draw; they're also cleared at every time step
       @particles = []
+
+    # examples:
+    #   g = new Game()
+    #   g.create(Player, "hellochar")
+    #
+    #
+    #   Game:
+    #     constructor: () =>
+    #       @world = new b2.World()
+    #
+    #     create: (entity, args...) =>
+    #       inst = new entity(args..., this)
+    #       @entities.push(inst)
+    #
+    #     step:
+    #       @entities.preStep()
+    #       
+    #       # game step involves:
+    #       # stepping the physics
+    #       # resolving all callbacks
+    #       @world.TimeStep(1/60f)
+    #       @entities.postStep()
+    #
+    #
+    #   Entity:
+    #     constructor: (@game) ->
+    #       @body = @createBody()
+    #
+    #     # the only invariant of preStep is that it will be called exactly once on each Entity in the game
+    #     # before TimeStep
+    #     # use to enforce invariants about what your characters will do
+    #     preStep()
+    #     # called exactly once on each Entity in the game after TimeStep
+    #     # use to enforce invariants about your variables; update them to reflect the new state of the game
+    #     postStep()
+    #
+    #   Player extends Entity:
+    #
+    #     BODYDEF = {}
+    #
+    #     constructor (@name, game):
+    #       super(game)
+    #
+    #     createBody: () =>
+    #       body = @game.world.CreateBody(BODYDEF)
+    #       body.feet = body.CreateFixture(FEET)
+    #       body.torso = body.CreateFixture(TORSO)
+    #       body
+    #
+    #     preStep: () =>
+    #       if keysPressed('w')
+    #         body.ApplyForce()...
+    #       ...
+    #       ...
+    #
+    #     postStep: () =>
+    #       @calculateVisionPoly()
+    #
+    #     shoot:
+    #       @game.create(Bullet, this, DESTROY)
+    #
+    #
+    #
+    #
+    #   vs.
+    #
+    #   g.addEntity(new Player("hellochar"))
+    #
+    #   addEntity: (ent) =>
+    #     @entities.push(ent)
+    #     $(ent).trigger("added", this)
+    #
+    #   Player extends Entity:
+    #     constructor: (@name) ->
+    #       super()
+    #       $(this).on("added", (game) =>
+    #         @game = game
+    #
+    #
+    #
+    # create: (entity, args...) =>
+    #   args.push(
+    #   @entities.push(new entity(
 
     createBlock: (x, y, isStatic = true) =>
       @world.createBlock(x, y, isStatic)
@@ -47,7 +136,7 @@ define [
 
       b.GetUserData()?.visible = false for b in @getBodies()
 
-      @youPlayer.update()
+      [p.update() for p in @players]
 
       method() for method in @delegates
       @delegates = []

@@ -11,8 +11,7 @@ define ['b2', 'utils', 'game/render/image_cache'], (b2, Utils, ImageCache) ->
 
     # convert the given screen location to its corresponding location on the screen
     worldVec2: (screenVec2) =>
-      worldVec2 = new b2.Vec2()
-      worldVec2.SetV(screenVec2)
+      worldVec2 = screenVec2.Copy()
       # express the location relative to the center of the canvas
       worldVec2.x -= @cq.canvas.width / 2
       worldVec2.y -= @cq.canvas.height / 2
