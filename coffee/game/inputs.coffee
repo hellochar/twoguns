@@ -1,6 +1,7 @@
 define [
   'underscore'
-], (_) ->
+  'b2'
+], (_, b2) ->
 
   class Inputs
     constructor: (@mouse, @keys) ->
@@ -29,6 +30,14 @@ define [
       @setLocation(x, y)
       @mouse.button = -1
       @mouse.down = false
+
+    toWorld: (renderer) =>
+      c = @clone()
+      c.mouse.location = renderer.worldVec2(new b2.Vec2(@mouse.x, @mouse.y))
+      delete c.mouse.x
+      delete c.mouse.y
+      c
+
 
     serialize: () =>
       JSON.stringify(this)

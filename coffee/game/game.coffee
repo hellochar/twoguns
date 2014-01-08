@@ -130,16 +130,14 @@ define [
     getFixturesOf: (body) => Utils.nextArray(body.GetFixtureList())
 
     # delta = number of ms since the last call to step
-    step: (delta) =>
+    step: () =>
       @particles = []
 
-      b.GetUserData()?.visible = false for b in @getBodies()
-
-      [p.update() for p in @players]
+      p.update() for p in @players
 
       method() for method in @delegates
       @delegates = []
-      @world.Step(60 / 1000, 10, 10)
+      @world.Step(1/30, 10, 10)
       @world.ClearForces()
 
     rayIntersectAll: (start, dir, filter, length = 10000) =>

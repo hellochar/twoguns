@@ -11,6 +11,8 @@ define [
 
   # The framework hooks the renderer and game model together, and also handles events
   # Events make the core of the framework. You can think of the game as just being a bunch of events happening, and responding accordingly
+  FRAME_OFFSET = 1
+
   framework = {
     setup : (socket, playerNames, yourName) ->
       @cq = cq().framework(this, this)
@@ -24,7 +26,10 @@ define [
 
       @socket = socket
       @networkCollector = new InputNetworkCollector(@game.players)
-      @frame = 0
+      # start off by filling in the first FRAME_OFFSET inputs with no-ops
+      for frame in [0...FRAME_OFFSET]
+        for player in @game.players
+          @networkCollector.put(player.name, (new Inputs()).toWorld(@renderer), frame)
 
       @statsStep = new Stats()
       @statsStep.setMode(0)
@@ -43,27 +48,21 @@ define [
 
     # game logic loop
     onStep: (delta, time) ->
-      @statsStep.begin()
 
-      playerInputs = @input.clone()
+      playerInputs = @input.toWorld(@renderer)
+      @socket.emit('inputPacket', playerInputs.serialize(), @networkCollector.frame + FRAME_OFFSET)
 
-      # it's a hack to put input logic copying here and will be replaced once network code gets here
-      playerInputs.mouse.location = @renderer.worldVec2(new b2.Vec2(@input.mouse.x, @input.mouse.y))
-      delete playerInputs.mouse.x
-      delete playerInputs.mouse.y
-
-      # @game.youPlayer.inputs = playerInputs
-      @socket.emit('inputPacket', playerInputs.serialize(), @frame)
-
-      if @networkCollector.isReady(@frame)
-        @networkCollector.loadFrame(@frame)
-        @game.step(delta)
-        @frame += 1
+      # you also shouldn't pass until you've sent the next frame
+      # but we emit before ever possibly loadFrame()-ing so we're ok
+      if @networkCollector.isReady()
+        @statsStep.begin()
+        @networkCollector.loadFrame()
+        @game.step()
+        #hack; should be part of a feature to collect all events that have happened since last step
         @input.mouse.down = false
+        @statsStep.end()
 
-        console.log("frame #{@frame}, stepped with", @networkCollector.inputGroups[@frame-1], ", hashCode #{@game.hashCode()}")
-
-      @statsStep.end()
+        # console.log("frame #{@frame}, stepped with", @networkCollector.inputGroups[@frame-1], ", hashCode #{@game.hashCode()}")
 
     # rendering loop
     onRender: (delta, time) ->
