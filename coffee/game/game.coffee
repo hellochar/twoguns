@@ -139,7 +139,7 @@ define [
 
       method() for method in @delegates
       @delegates = []
-      @world.Step(delta / 1000, 10, 10)
+      @world.Step(60 / 1000, 10, 10)
       @world.ClearForces()
 
     rayIntersectAll: (start, dir, filter, length = 10000) =>
@@ -192,6 +192,10 @@ define [
       fixture = singlePolygonBody.GetFixtureList()
       shape = fixture.GetShape()
       return (b2.Math.MulX(xf, v) for v in shape.GetVertices())
+
+    hashCode: () =>
+      numbers = _.flatten([[b.GetWorldCenter().x, b.GetWorldCenter().y] for b in @getBodies()])
+      _.reduce(numbers, ((accum, num) -> accum + num), 0)
 
 
   return Game

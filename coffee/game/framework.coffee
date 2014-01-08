@@ -42,7 +42,7 @@ define [
       document.body.appendChild( @statsRender.domElement )
 
     # game logic loop
-    onRender: (delta, time) ->
+    onStep: (delta, time) ->
       @statsStep.begin()
 
       playerInputs = @input.clone()
@@ -58,9 +58,10 @@ define [
       if @networkCollector.isReady(@frame)
         @networkCollector.loadFrame(@frame)
         @game.step(delta)
+        @frame += 1
         @input.mouse.down = false
 
-        @frame += 1
+        console.log("frame #{@frame}, stepped with", @networkCollector.inputGroups[@frame-1], ", hashCode #{@game.hashCode()}")
 
       @statsStep.end()
 
