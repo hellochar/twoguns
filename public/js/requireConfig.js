@@ -28,5 +28,8 @@ var require = {
         maybe: {
             exports: 'Maybe'
         },
+        canvasquery: {
+            exports: 'cq'
+        },
     }
 };

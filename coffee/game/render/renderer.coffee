@@ -1,4 +1,9 @@
-define ['b2', 'utils', 'game/render/image_cache'], (b2, Utils, ImageCache) ->
+define [
+  'b2'
+  'utils'
+  'game/world/bullet_userdata'
+  'game/render/image_cache'
+], (b2, Utils, BulletUserData, ImageCache) ->
 
   class Renderer
     constructor: (@viewportWidth, @game, @cq) ->
@@ -74,11 +79,16 @@ define ['b2', 'utils', 'game/render/image_cache'], (b2, Utils, ImageCache) ->
       @drawBody(body) for body in @game.getBodiesInAABB(@visibleAABB())
       # @game.world.QueryAABB(((fixture) => @drawBody(fixture.GetBody())), @visibleAABB())
 
-      # draw all particles
-      @cq.context.save()
-      for particle in @game.particles
-        particle(@cq)
-      @cq.context.restore()
+      # draw sightline
+      isect = @game.rayIntersect(@game.youPlayer.playerBody.GetWorldCenter(), @game.youPlayer.playerBody.direction,
+        (fixture) -> not (fixture.GetBody().GetUserData() instanceof BulletUserData)
+      )
+      if isect
+        @cq.fillStyle("red").beginPath().circle(isect.point.x, isect.point.y, 0.035).fill()
+        @cq.strokeStyle("rgba(255, 0, 0, 0.3)").beginPath().
+          moveTo(@game.youPlayer.playerBody.GetWorldCenter().x, @game.youPlayer.playerBody.GetWorldCenter().y).
+          lineTo(isect.point.x, isect.point.y).
+          stroke()
 
       # restore global context
       @cq.context.restore()

@@ -33,9 +33,6 @@ define [
       # a callback function for collisions
       @delegates = []
 
-      # particles are methods that get the rendering context passed to them so they can draw; they're also cleared at every time step
-      @particles = []
-
     # examples:
     #   g = new Game()
     #   g.create(Player, "hellochar")
@@ -131,8 +128,6 @@ define [
 
     # delta = number of ms since the last call to step
     step: () =>
-      @particles = []
-
       method() for method in @delegates
       @delegates = []
 

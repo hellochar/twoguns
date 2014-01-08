@@ -31,8 +31,8 @@ define [
         FIXDEF.shape.SetAsBox( width / 2, height / 2 )
         @torso = @CreateFixture(FIXDEF)
 
-        FEET_HEIGHT = 0.01
-        FEET_WIDTH = width / 2 - .01
+        FEET_HEIGHT = 0.001
+        FEET_WIDTH = width / 2 - .005
 
         FIXDEF.shape.SetAsVector([
           new b2.Vec2(FEET_WIDTH, height / 2),
@@ -46,8 +46,8 @@ define [
         @game = game
         @world = @game.world
 
-        # angle you are looking at
-        @facing = 0
+        # normalized vector representing the angle you are looking at
+        @direction = new b2.Vec2(1, 0)
 
         @jumpCounter = 0
         $(@feet).on("begincontact", (evt, contact, myFixture, otherFixture) =>
