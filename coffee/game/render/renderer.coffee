@@ -45,11 +45,11 @@ define ['b2', 'utils', 'game/render/image_cache'], (b2, Utils, ImageCache) ->
       .scale(@scale(), @scale())
       .lineWidth(1 / @scale())
 
-      # @cq.fillStyle("white").globalCompositeOperation("source-over")
-      # # draw the vision poly in white
-      # @cq.beginPath()
-      # @cq.lineTo(point.x, point.y) for point in @game.youPlayer.getVisionPoly()
-      # @cq.fill()
+      @cq.fillStyle("white").globalCompositeOperation("source-over")
+      # draw the vision poly in white
+      @cq.beginPath()
+      @cq.lineTo(point.x, point.y) for point in @game.youPlayer.getVisionPoly()
+      @cq.fill()
 
       # draw the background that you can see
       @cq.context.globalCompositeOperation = "source-atop"

@@ -133,17 +133,19 @@ define [
     step: () =>
       @particles = []
 
-      p.update() for p in @players
-
       method() for method in @delegates
       @delegates = []
 
-      [b.GetUserData()?.preStep?() for b in @getBodies()]
+      $(@).trigger("prestep")
 
       @world.Step(1/30, 10, 10)
       @world.ClearForces()
 
-      [b.GetUserData()?.postStep?() for b in @getBodies()]
+      $(@).trigger("poststep")
+
+    register: (listener) =>
+      eventNames = ["prestep", "poststep"]
+      $(@).on(name, listener[name]) for name in eventNames when listener[name]?
 
     rayIntersectAll: (start, dir, filter, length = 10000) =>
       arr = []

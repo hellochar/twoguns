@@ -4,10 +4,11 @@ define [
     constructor: (@body) ->
       @oldPosition = @body.GetWorldCenter().Copy()
       @currentPosition = @body.GetWorldCenter().Copy()
+      @body.GetWorld().game.register(this)
 
-    preStep: () ->
+    prestep: () =>
 
-    postStep: () ->
+    poststep: () =>
       @oldPosition = @currentPosition.Copy()
       @currentPosition = @body.GetWorldCenter().Copy()
 

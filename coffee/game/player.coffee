@@ -7,16 +7,16 @@ define [
 
   class Player
     constructor: (@name, @game) ->
-      @kills = 0
       @createPlayerBody()
+      @game.register(@)
 
     createPlayerBody: () =>
       @playerBody = PlayerBody.create(@)
 
-    update: () =>
-      @keysPressed = @inputs.keys
+    prestep: () =>
       @mouse = @inputs.mouse
       IMPULSE_JUMP = new b2.Vec2(0, -0.04 / @playerBody.GetMass())
+      IMPULSE_DOWN = new b2.Vec2(0, -0.04 / @playerBody.GetMass())
       FORCE_WALK_X = 4.0
       FORCE_FLY = new b2.Vec2(0, -0.8)
       loc = @playerBody.GetWorldCenter().Copy()
@@ -37,17 +37,18 @@ define [
         @playerBody.SetLinearVelocity(new b2.Vec2(0, vel.y))
 
       if @inputs.pressed('s')
-        @playerBody.ApplyImpulse(new b2.Vec2(0, IMPULSE_JUMP / 10), loc)
+        @playerBody.ApplyImpulse(IMPULSE_JUMP.Copy().Multiply(1/10), loc)
 
       if @mouse.down
-        @playerBody.shootAt(@mouse.location, {0: "create", 2: "destroy"}[@mouse.button])
+        @playerBody.shoot({0: "create", 2: "destroy"}[@mouse.button])
 
       # hack: should be moved into bullet class
       bullet.ApplyForce(@playerBody.world.GetGravity().GetNegative(), bullet.GetWorldCenter()) for bullet in @playerBody.bullets
 
-      direction = @playerBody.directionTo(@mouse.location)
+    poststep: () =>
+      @playerBody.direction = @directionTo(@mouse.location)
       sightline = ( =>
-        isect = @playerBody.game.rayIntersect(@playerBody.GetWorldCenter(), direction,
+        isect = @playerBody.game.rayIntersect(@playerBody.GetWorldCenter(), @playerBody.direction,
           (fixture) -> fixture.GetBody().GetUserData() instanceof BlockUserData
         )
         if isect
@@ -61,10 +62,20 @@ define [
           undefined
       )()
       @game.particles.push(sightline) if sightline
-      # @playerBody.calculateVisionPoly()
+      @playerBody.calculateVisionPoly()
 
     getVisionPoly: () =>
       @playerBody.getVisionPoly()
+
+    directionTo: (x, y) =>
+      if "x" of x and "y" of x and y == undefined
+        {x: x, y: y} = x
+
+      direction = new b2.Vec2(x, y)
+      direction.Subtract(@playerBody.GetWorldCenter())
+      direction.Normalize()
+
+      direction
 
     # this method should make the renderer look at you, offset by the mouse position
     lookAt: (renderer, mx, my) =>

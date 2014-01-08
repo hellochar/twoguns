@@ -46,6 +46,9 @@ define [
         @game = game
         @world = @game.world
 
+        # angle you are looking at
+        @facing = 0
+
         @jumpCounter = 0
         $(@feet).on("begincontact", (evt, contact, myFixture, otherFixture) =>
           @jumpCounter += 1
@@ -96,32 +99,19 @@ define [
         poly.push(point)
       @visionPoly = poly
 
-
-    directionTo: (x, y) ->
-      if "x" of x and "y" of x and y == undefined
-        {x: x, y: y} = x
-
-      direction = new b2.Vec2(x, y)
-      direction.Subtract(@GetWorldCenter())
-      direction.Normalize()
-
-      direction
-
-    shootAt: (location, bulletType) ->
-      direction = @directionTo(location)
-
+    shoot: (bulletType) ->
       bodyDef = new b2.BodyDef()
       bodyDef.type = b2.Body.b2_dynamicBody
       bodyDef.bullet = true
 
       bodyDef.position.SetV(@GetWorldCenter())
-      positionOffset = direction.Copy()
+      positionOffset = @direction.Copy()
       DISTANCE_OFFSET = .5
       positionOffset.Multiply(DISTANCE_OFFSET)
       bodyDef.position.Add(positionOffset)
 
       BULLET_SPEED = 50
-      bodyDef.linearVelocity.SetV(direction)
+      bodyDef.linearVelocity.SetV(@direction)
       bodyDef.linearVelocity.Multiply(BULLET_SPEED)
 
       body = @world.CreateBody(bodyDef)
