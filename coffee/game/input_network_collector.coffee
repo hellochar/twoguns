@@ -11,10 +11,16 @@ define [
       # the next frame we're trying to load
       @frame = 0
 
+      # holds the hashCode for the game at frame [idx]
+      @hashCodes = []
+
     put: (playerName, inputs, frame) =>
       group = (@inputGroups[frame] ||= {})
       # throw new Error("Put on already existing input!") if group[playerName]?
       group[playerName] ||= inputs
+
+    putHash: (hash) =>
+      @hashCodes[@frame] = hash
 
     isReady: () =>
       return false if not @inputGroups[@frame]?
@@ -24,8 +30,10 @@ define [
     loadFrame: () =>
       throw new Error("frame #{@frame} isn't ready but is being loaded!") if not @isReady()
       group = @inputGroups[@frame]
-      @frame += 1
       [p.inputs = group[p.name] for p in @players]
+
+    checkHash: (hash, frame) =>
+      throw new Error("Frame #{frame} desync: hash #{hash} doesn't match with mine #{@hashCodes[frame]}") if hash isnt @hashCodes[frame]
 
 
   return InputNetworkCollector

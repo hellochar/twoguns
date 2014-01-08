@@ -11,7 +11,7 @@ define [
 
   # The framework hooks the renderer and game model together, and also handles events
   # Events make the core of the framework. You can think of the game as just being a bunch of events happening, and responding accordingly
-  FRAME_OFFSET = 1
+  FRAME_OFFSET = 2
 
   framework = {
     setup : (socket, playerNames, yourName) ->
@@ -49,17 +49,22 @@ define [
     # game logic loop
     onStep: (delta, time) ->
 
-      playerInputs = @input.toWorld(@renderer)
-      @socket.emit('inputPacket', playerInputs.serialize(), @networkCollector.frame + FRAME_OFFSET)
-
       # you also shouldn't pass until you've sent the next frame
       # but we emit before ever possibly loadFrame()-ing so we're ok
       if @networkCollector.isReady()
         @statsStep.begin()
+
+        playerInputs = @input.toWorld(@renderer)
+        @socket.emit('inputPacket', playerInputs.serialize(), @networkCollector.frame + FRAME_OFFSET)
+
+        @socket.emit('hashcode', @game.hashCode(), @networkCollector.frame)
+        @networkCollector.putHash(@game.hashCode())
+
         @networkCollector.loadFrame()
         @game.step()
         #hack; should be part of a feature to collect all events that have happened since last step
         @input.mouse.down = false
+        @networkCollector.frame += 1
         @statsStep.end()
 
         # console.log("frame #{@frame}, stepped with", @networkCollector.inputGroups[@frame-1], ", hashCode #{@game.hashCode()}")
@@ -101,6 +106,9 @@ define [
 
     onInputPacket: (playerName, inputSerialized, frameStamp) ->
       @networkCollector.put(playerName, Inputs.unserialize(inputSerialized), frameStamp)
+
+    onHashcode: (hash, frame) ->
+      @networkCollector.checkHash(hash, frame)
 
   }
 

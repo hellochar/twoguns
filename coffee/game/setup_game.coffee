@@ -41,3 +41,7 @@ require ['jquery', 'underscore', 'socket.io', 'game/framework'], ($, _, io, fram
     framework.onInputPacket(playerName, inputSerialized, frameStamp)
   )
 
+  socket.on('hashcode', (hash, frame) ->
+    framework.onHashcode(hash, frame)
+  )
+
