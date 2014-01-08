@@ -16,5 +16,6 @@ define ['box2d'], (Box2D) ->
   b2.MassData = Box2D.Collision.Shapes.b2MassData
   b2.Shape = Box2D.Collision.Shapes.b2Shape
   b2.Math = Box2D.Common.Math.b2Math
+  b2.Settings = Box2D.Common.b2Settings
 
   b2

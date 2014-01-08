@@ -2,7 +2,7 @@ require ['jquery', 'underscore', 'socket.io', 'game/framework'], ($, _, io, fram
 
   window.framework = framework
 
-  AUTOSTART = true
+  # AUTOSTART = true
 
   randomName = (String.fromCharCode(65 + Math.random() * 26) for x in [0..8]).join("")
   $("#lobby").append("<h3> Players: </h3><div id='players'></div>")

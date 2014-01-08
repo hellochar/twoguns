@@ -3,7 +3,8 @@ define [
   'utils'
   'game/player_body'
   'game/world/block_userdata'
-], (b2, Utils, PlayerBody, BlockUserData) ->
+  'game/world/bullet_userdata'
+], (b2, Utils, PlayerBody, BlockUserData, BulletUserData) ->
 
   class Player
     constructor: (@name, @game) ->
@@ -61,6 +62,16 @@ define [
       direction.Normalize()
 
       direction
+
+    # you can see yourself
+    # if it's a block, you can see it
+    # if it's a body blocking your line of sight, you can see it
+    # if it's a bullet, you can see it
+    canSee: (body) =>
+      return true if body is @playerBody
+      return true if body.GetUserData() instanceof BlockUserData
+      return true if _.contains(@playerBody.collidedBodies, body)
+      return true if body.GetUserData() instanceof BulletUserData
 
     # this method should make the renderer look at you, offset by the mouse position
     lookAt: (renderer, mx, my) =>

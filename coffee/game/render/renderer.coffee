@@ -72,12 +72,8 @@ define [
 
       @cq.globalCompositeOperation("source-over")
 
-
-      # @cq.context.globalCompositeOperation = "source-atop"
-      # @drawBody(body) for body in @game.getBodies()
       # cull off-screen bodies
-      @drawBody(body) for body in @game.getBodiesInAABB(@visibleAABB())
-      # @game.world.QueryAABB(((fixture) => @drawBody(fixture.GetBody())), @visibleAABB())
+      @drawBody(body) for body in @game.getBodiesInAABB(@visibleAABB()) when @game.youPlayer.canSee(body)
 
       # draw sightline
       isect = @game.rayIntersect(@game.youPlayer.playerBody.GetWorldCenter(), @game.youPlayer.playerBody.direction,
@@ -94,7 +90,10 @@ define [
       @cq.context.restore()
 
     drawBody: (body) =>
-      body.GetUserData()?.draw(this, => @drawBodyDefault(body)) || @drawBodyDefault(body)
+      if body.GetUserData()?.draw
+        body.GetUserData()?.draw(this, => @drawBodyDefault(body))
+      else
+        @drawBodyDefault(body)
 
     drawBodyDefault: (body) =>
       xf = body.m_xf
