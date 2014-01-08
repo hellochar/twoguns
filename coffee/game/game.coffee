@@ -21,7 +21,6 @@ define [
     constructor: (@width, @height, playerNames, yourName, @random = new Random()) ->
       @entities = []
       @world = new GameWorld(new b2.Vec2(0, 8), true, this)
-      @frame = 0
 
       @players = (new Player(name, this) for name in playerNames)
       @youPlayer = ( =>

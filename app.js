@@ -15,7 +15,7 @@ io.set('log level', 3);
 
 server.listen(PORT);
 
-// array of names
+// pid : name
 currentPlayers = {};
 globalCounter = 0;
 
@@ -44,7 +44,8 @@ io.sockets.on('connection', function (socket) {
         console.log("players are now", currentPlayers);
     });
 
-    socket.on('inputPacket', function(player, time) {
+    socket.on('inputPacket', function(inputSerialized, frameStamp) {
+        io.sockets.emit('inputPacket', player.name, inputSerialized, frameStamp);
     })
 
 });

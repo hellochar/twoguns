@@ -4,18 +4,15 @@ define [
   'canvasquery'
   'game/game'
   'game/inputs'
-  'game/input_playback'
-  'game/input_recorder'
+  'game/input_network_collector'
   'game/player'
   'game/render/renderer'
-], (_, b2, cq, Game, Inputs, InputPlayback, InputRecorder, Player, Renderer) ->
-
-  recorder = new InputRecorder()
+], (_, b2, cq, Game, Inputs, InputNetworkCollector, Player, Renderer) ->
 
   # The framework hooks the renderer and game model together, and also handles events
   # Events make the core of the framework. You can think of the game as just being a bunch of events happening, and responding accordingly
   framework = {
-    setup : (playerNames, yourName) ->
+    setup : (socket, playerNames, yourName) ->
       @cq = cq().framework(this, this)
       @cq.appendTo("body")
       @input = new Inputs(
@@ -24,6 +21,10 @@ define [
       )
       @game = new Game(80, 20, playerNames, yourName)
       @renderer = new Renderer(18, @game, @cq)
+
+      @socket = socket
+      @networkCollector = new InputNetworkCollector(@game.players)
+      @frame = 0
 
       @statsStep = new Stats()
       @statsStep.setMode(0)
@@ -44,8 +45,6 @@ define [
     onRender: (delta, time) ->
       @statsStep.begin()
 
-      # recorder.record(@input)
-
       playerInputs = @input.clone()
 
       # it's a hack to put input logic copying here and will be replaced once network code gets here
@@ -53,18 +52,24 @@ define [
       delete playerInputs.mouse.x
       delete playerInputs.mouse.y
 
-      @game.youPlayer.inputs = playerInputs
-      @game.step(delta)
+      # @game.youPlayer.inputs = playerInputs
+      @socket.emit('inputPacket', playerInputs.serialize(), @frame)
 
-      @input.mouse.down = false
+      if @networkCollector.isReady(@frame)
+        @networkCollector.loadFrame(@frame)
+        @game.step(delta)
+        @input.mouse.down = false
+
+        @frame += 1
+
       @statsStep.end()
 
+    # rendering loop
+    onRender: (delta, time) ->
       @statsRender.begin()
       @renderer.render(@input.mouse.x, @input.mouse.y)
       @statsRender.end()
 
-    # # rendering loop
-    # onRender: (delta, time) ->
 
     # window resize
     onResize: (width, height) ->
@@ -87,6 +92,16 @@ define [
       @input.keys[key] = true
     onKeyUp: (key) ->
       delete @input.keys[key]
+
+    onDisconnected: (playerName) ->
+      # delete player from game
+      # - or -
+      # keep a list of players "connected"; disconnected players don't need input for the game to continue
+      #   also account for reconnect
+
+    onInputPacket: (playerName, inputSerialized, frameStamp) ->
+      @networkCollector.put(playerName, Inputs.unserialize(inputSerialized), frameStamp)
+
   }
 
   return framework
