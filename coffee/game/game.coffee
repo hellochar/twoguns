@@ -142,7 +142,7 @@ define [
       eventNames = ["prestep", "poststep"]
       $(@).on(name, listener[name]) for name in eventNames when listener[name]?
 
-    rayIntersectAll: (start, dir, filter, length = 10000) =>
+    rayIntersectAll: (start, dir, filter, length) =>
       $(@).trigger('rayintersectall')
       arr = []
       point2 = start.Copy()
@@ -171,7 +171,7 @@ define [
     # dir: normalized direction of the ray
     # filter: function (fixture, point, normal, fraction) => boolean;
     #   only look at intersections that match this filter
-    rayIntersect: (start, dir, filter, length = 100) =>
+    rayIntersect: (start, dir, filter, length) =>
       arr = @rayIntersectAll(start, dir, filter, length)
 
       if arr.length > 0

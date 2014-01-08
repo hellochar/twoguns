@@ -41,10 +41,7 @@ define [
         @playerBody.ApplyImpulse(IMPULSE_JUMP.Copy().Multiply(1/10), loc)
 
       if @mouse.down
-        @playerBody.shoot({0: "create", 2: "destroy"}[@mouse.button])
-
-      # hack: should be moved into bullet class
-      bullet.ApplyForce(@playerBody.world.GetGravity().GetNegative(), bullet.GetWorldCenter()) for bullet in @playerBody.bullets
+        @playerBody.shoot({0: "destroy", 2: "create"}[@mouse.button])
 
     poststep: () =>
       @playerBody.direction = @directionTo(@mouse.location)

@@ -78,7 +78,8 @@ define [
 
       # draw sightline
       isect = @game.rayIntersect(@game.youPlayer.playerBody.GetWorldCenter(), @game.youPlayer.playerBody.direction,
-        (fixture) -> not (fixture.GetBody().GetUserData() instanceof BulletUserData)
+        ((fixture) -> not (fixture.GetBody().GetUserData() instanceof BulletUserData))
+        , 100
       )
       if isect
         @cq.fillStyle("red").beginPath().circle(isect.point.x, isect.point.y, 0.035).fill()

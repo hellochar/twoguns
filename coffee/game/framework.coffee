@@ -74,6 +74,7 @@ define [
 
         playerInputs = @input.toWorld(@renderer)
         @socket.emit('inputPacket', playerInputs.serialize(), @networkCollector.frame + FRAME_OFFSET)
+        # console.log("sent input for #{@networkCollector.frame + FRAME_OFFSET}:#{@game.youPlayer.name}")
 
         @socket.emit('hashcode', @game.hashCode(), @networkCollector.frame)
         @networkCollector.putHash(@game.hashCode())
@@ -82,10 +83,7 @@ define [
         @game.step()
         #hack; should be part of a feature to collect all events that have happened since last step
         @input.mouse.down = false
-        @networkCollector.frame += 1
         @statsStep.end()
-
-        # console.log("frame #{@frame}, stepped with", @networkCollector.inputGroups[@frame-1], ", hashCode #{@game.hashCode()}")
 
     # rendering loop
     onRender: (delta, time) ->

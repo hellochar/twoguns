@@ -5,10 +5,11 @@ define [
   'noise',
   'stats',
   'multi_contact_listener'
+  'game/bullet'
   'game/world/block_userdata'
   'game/world/bullet_userdata'
   'game/world/player_userdata'
-], ($, _, b2, ClassicalNoise, Stats, MultiContactListener, BlockUserData, BulletUserData, PlayerUserData) ->
+], ($, _, b2, ClassicalNoise, Stats, MultiContactListener, Bullet, BlockUserData, BulletUserData, PlayerUserData) ->
 
   BODYDEF = new b2.BodyDef
   BODYDEF.type = b2.Body.b2_dynamicBody
@@ -57,9 +58,6 @@ define [
           @jumpCounter -= 1
         )
 
-        @bullets = []
-
-
         for methodName, impl of pbMethods
           @[methodName] = impl.bind(@)
       ).bind(body)()
@@ -85,7 +83,7 @@ define [
         dir = new b2.Vec2(Math.cos(angle), Math.sin(angle))
         isect = @game.rayIntersect(@GetWorldCenter(), dir,
           (fixture) => fixture.GetBody() isnt this and not (fixture.GetBody().GetUserData() instanceof BulletUserData),
-          100
+          30
         )
         @collidedBodies.push(isect?.fixture.GetBody())
         point = isect?.point
@@ -93,7 +91,7 @@ define [
         if not point
           point = @GetWorldCenter().Copy()
           offset = dir.Copy()
-          offset.Multiply(100)
+          offset.Multiply(30)
           point.Add(offset)
         poly.push(point)
       @visionPoly = poly
@@ -103,54 +101,13 @@ define [
       bodyDef.type = b2.Body.b2_dynamicBody
       bodyDef.bullet = true
 
-      bodyDef.position.SetV(@GetWorldCenter())
+      pos = @GetWorldCenter().Copy()
       positionOffset = @direction.Copy()
       DISTANCE_OFFSET = .5
       positionOffset.Multiply(DISTANCE_OFFSET)
-      bodyDef.position.Add(positionOffset)
+      pos.Add(positionOffset)
 
-      BULLET_SPEED = 50
-      bodyDef.linearVelocity.SetV(@direction)
-      bodyDef.linearVelocity.Multiply(BULLET_SPEED)
-
-      body = @world.CreateBody(bodyDef)
-      body.SetUserData(new BulletUserData(body))
-
-      fixDef = new b2.FixtureDef()
-      fixDef.density = 0.0
-      fixDef.friction = 0.0
-      fixDef.restitution = 0
-      # fixDef.isSensor = true
-      fixDef.shape = new b2.CircleShape(.05)
-
-      body.CreateFixture(fixDef)
-
-      $(body).on("begincontact", (evt, contact, myFixture, otherFixture) =>
-        if contact.IsTouching()
-          @game.delegates.push( =>
-            @world.DestroyBody(body)
-            @bullets = _.without(@bullets, body)
-          )
-          $(body).off("begincontact")
-
-          if otherFixture.GetBody().GetUserData() instanceof BlockUserData
-            if bulletType is "create"
-              @game.delegates.push(=>@world.DestroyBody(otherFixture.GetBody()))
-            else if bulletType is "destroy"
-              @game.delegates.push(=>
-                blockCenter = body.GetWorldCenter()
-                direction = contact.GetManifold().m_localPoint
-                length = direction.Normalize()
-                direction.Multiply(length - fixDef.shape.GetRadius())
-                blockCenter.Add(direction)
-                @game.createBlock(blockCenter.x, blockCenter.y)
-              )
-
-      )
-
-      @bullets.push(body)
-
-
+      new Bullet(@player, pos, @direction, bulletType)
   }
 
   return PlayerBody

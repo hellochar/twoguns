@@ -1,7 +1,7 @@
 define [
 ], () ->
   class BulletUserData
-    constructor: (@body) ->
+    constructor: (@body, @bullet) ->
       @oldPosition = @body.GetWorldCenter().Copy()
       @currentPosition = @body.GetWorldCenter().Copy()
       @body.GetWorld().game.register(this)
@@ -14,9 +14,11 @@ define [
 
     draw: (renderer, defaultMethod) =>
       positionNow = @currentPosition
-      renderer.cq.beginPath().stroke(@color()).moveTo(@oldPosition.x, @oldPosition.y).lineTo(positionNow.x, positionNow.y).stroke()
+      renderer.cq.beginPath().strokeStyle(@color()).moveTo(@oldPosition.x, @oldPosition.y).lineTo(positionNow.x, positionNow.y).stroke()
       defaultMethod()
-    color: () => "green"
+
+    color: () =>
+      if(@bullet.bulletType is "create") then "green" else "red"
 
   return BulletUserData
 

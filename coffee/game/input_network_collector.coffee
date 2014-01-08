@@ -6,7 +6,7 @@ define [
     # array of game/player
     constructor: (@players) ->
       # each element is a {name -> Inputs}
-      # inputGroups[i] == group for frame i
+      # inputGroups[i] == group for frame number @frame+i
       @inputGroups = []
       @playerNames = (p.name for p in @players)
       # the next frame we're trying to load
@@ -16,7 +16,8 @@ define [
       @hashCodes = []
 
     put: (playerName, inputs, frame) =>
-      group = (@inputGroups[frame] ||= {})
+      # console.log("put input for #{frame}:#{playerName}")
+      group = (@inputGroups[frame - @frame] ||= {})
       # throw new Error("Put on already existing input!") if group[playerName]?
       group[playerName] ||= inputs
 
@@ -29,14 +30,15 @@ define [
       @playerNames = (p.name for p in @players)
 
     isReady: () =>
-      return false if not @inputGroups[@frame]?
-      frameReadyNames = _.keys(@inputGroups[@frame])
+      return false if not @inputGroups[0]?
+      frameReadyNames = _.keys(@inputGroups[0])
       _.difference(@playerNames, frameReadyNames).length == 0 and @playerNames.length == frameReadyNames.length
 
     loadFrame: () =>
       throw new Error("frame #{@frame} isn't ready but is being loaded!") if not @isReady()
-      group = @inputGroups[@frame]
+      group = @inputGroups.shift()
       [p.inputs = group[p.name] for p in @players]
+      @frame += 1
 
     checkHash: (hash, frame) =>
       throw new Error("Frame #{frame} desync: hash #{hash} doesn't match with mine #{@hashCodes[frame]}") if hash isnt @hashCodes[frame]
