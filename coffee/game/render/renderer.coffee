@@ -45,38 +45,30 @@ define ['b2', 'utils', 'game/render/image_cache'], (b2, Utils, ImageCache) ->
       .scale(@scale(), @scale())
       .lineWidth(1 / @scale())
 
-      @cq.fillStyle("white").globalCompositeOperation("source-over")
-      # draw the vision poly in white
-      @cq.beginPath()
-      @cq.lineTo(point.x, point.y) for point in @game.youPlayer.getVisionPoly()
-      @cq.fill()
+      # @cq.fillStyle("white").globalCompositeOperation("source-over")
+      # # draw the vision poly in white
+      # @cq.beginPath()
+      # @cq.lineTo(point.x, point.y) for point in @game.youPlayer.getVisionPoly()
+      # @cq.fill()
 
       # draw the background that you can see
       @cq.context.globalCompositeOperation = "source-atop"
       @cq.context.save()
       @cq.scale(.2, .2)
-      @cq.drawImage(ImageCache.get('img/bg.jpg'), -400, -420)
-      @cq.context.save()
-      @cq.context.setTransform(1, 0, 0, 1, 0, 0)
-      @cq.clear("rgba(0, 0, 0, .5)")
-      @cq.context.restore()
+      @cq.drawImage(ImageCache.get('img/bg.jpg'), -400, -920)
       @cq.context.restore()
 
       # draw the rest of the background
-      @cq.globalCompositeOperation("source-out")
+      @cq.globalCompositeOperation("destination-over")
       @cq.context.save()
       @cq.scale(.2, .2)
-      @cq.drawImage(ImageCache.get('img/bg.jpg'), -400, -420)
-      @cq.context.save()
-      @cq.context.setTransform(1, 0, 0, 1, 0, 0)
-      @cq.clear("rgba(0, 0, 0, .9)")
-      @cq.context.restore()
+      @cq.drawImage(ImageCache.get('img/bg-novision.jpg'), -400, -920)
       @cq.context.restore()
 
       @cq.globalCompositeOperation("source-over")
 
 
-      @cq.context.globalCompositeOperation = "source-atop"
+      # @cq.context.globalCompositeOperation = "source-atop"
       # @drawBody(body) for body in @game.getBodies()
       # cull off-screen bodies
       @drawBody(body) for body in @game.getBodiesInAABB(@visibleAABB())

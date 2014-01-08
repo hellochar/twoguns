@@ -120,12 +120,12 @@ define [
       positionOffset.Multiply(DISTANCE_OFFSET)
       bodyDef.position.Add(positionOffset)
 
-      BULLET_SPEED = 10
+      BULLET_SPEED = 50
       bodyDef.linearVelocity.SetV(direction)
       bodyDef.linearVelocity.Multiply(BULLET_SPEED)
 
       body = @world.CreateBody(bodyDef)
-      body.SetUserData(new BulletUserData())
+      body.SetUserData(new BulletUserData(body))
 
       fixDef = new b2.FixtureDef()
       fixDef.density = 0.0

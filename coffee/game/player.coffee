@@ -53,7 +53,7 @@ define [
         if isect
           return (cq) =>
             cq.fillStyle("red").beginPath().circle(isect.point.x, isect.point.y, 0.035).fill()
-            cq.strokeStyle("red").beginPath().
+            cq.strokeStyle("rgba(255, 0, 0, 0.5)").beginPath().
               moveTo(@playerBody.GetWorldCenter().x, @playerBody.GetWorldCenter().y).
               lineTo(isect.point.x, isect.point.y).
               stroke()
@@ -61,7 +61,7 @@ define [
           undefined
       )()
       @game.particles.push(sightline) if sightline
-      @playerBody.calculateVisionPoly()
+      # @playerBody.calculateVisionPoly()
 
     getVisionPoly: () =>
       @playerBody.getVisionPoly()

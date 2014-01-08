@@ -137,8 +137,13 @@ define [
 
       method() for method in @delegates
       @delegates = []
+
+      [b.GetUserData()?.preStep?() for b in @getBodies()]
+
       @world.Step(1/30, 10, 10)
       @world.ClearForces()
+
+      [b.GetUserData()?.postStep?() for b in @getBodies()]
 
     rayIntersectAll: (start, dir, filter, length = 10000) =>
       arr = []

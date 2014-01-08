@@ -20,7 +20,7 @@ define [
         {x: @cq.canvas.width/2, y: @cq.canvas.height/2},
         {}
       )
-      @game = new Game(80, 20, playerNames, yourName)
+      @game = new Game(30, 80, playerNames, yourName)
       @renderer = new Renderer(18, @game, @cq)
 
       @socket = socket
@@ -47,6 +47,9 @@ define [
 
     # game logic loop
     onStep: (delta, time) ->
+      @renderer.viewportWidth *= 1.05 if @input.pressed('dash')
+      @renderer.viewportWidth /= 1.05 if @input.pressed('equal')
+
       if @networkCollector.isReady()
         @statsStep.begin()
 
