@@ -9,8 +9,7 @@ define [
   'game/render/renderer'
 ], (_, b2, cq, Game, Inputs, InputNetworkCollector, Player, Renderer) ->
 
-  # The framework hooks the renderer and game model together, and also handles events
-  # Events make the core of the framework. You can think of the game as just being a bunch of events happening, and responding accordingly
+  # induces feedback latency equal to FRAME_OFFSET * (ms per frame)
   FRAME_OFFSET = 2
 
   framework = {
@@ -48,9 +47,6 @@ define [
 
     # game logic loop
     onStep: (delta, time) ->
-
-      # you also shouldn't pass until you've sent the next frame
-      # but we emit before ever possibly loadFrame()-ing so we're ok
       if @networkCollector.isReady()
         @statsStep.begin()
 
