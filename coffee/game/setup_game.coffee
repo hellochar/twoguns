@@ -27,7 +27,7 @@ require ['jquery', 'underscore', 'socket.io', 'game/framework'], ($, _, io, fram
       $("#players").append("<p>#{player.name}</p>")
     )
 
-    if AUTOSTART
+    if AUTOSTART?
       socket.emit('start')
   )
   socket.on('gamestart', () ->

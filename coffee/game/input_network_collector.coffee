@@ -1,6 +1,7 @@
 define [
+  'underscore'
   'game/inputs'
-], (Inputs) ->
+], (_, Inputs) ->
   class InputNetworkCollector
     # array of game/player
     constructor: (@players) ->
@@ -21,6 +22,11 @@ define [
 
     putHash: (hash) =>
       @hashCodes[@frame] = hash
+
+    removePlayer: (playerName) =>
+      player = _.findWhere(name: playerName)
+      @player = _.without(@players, player)
+      @playerNames = (p.name for p in @players)
 
     isReady: () =>
       return false if not @inputGroups[@frame]?

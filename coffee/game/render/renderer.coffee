@@ -1,9 +1,10 @@
 define [
+  'jquery'
   'b2'
   'utils'
   'game/world/bullet_userdata'
   'game/render/image_cache'
-], (b2, Utils, BulletUserData, ImageCache) ->
+], ($, b2, Utils, BulletUserData, ImageCache) ->
 
   class Renderer
     constructor: (@viewportWidth, @game, @cq) ->
@@ -40,7 +41,7 @@ define [
       @game.youPlayer.lookAt(this, mx, my)
 
       @cq.clear()
-      @cq.context.save()
+      @cq.save()
 
       # convert cq's transform into world coordinates
       @cq
@@ -87,7 +88,8 @@ define [
           stroke()
 
       # restore global context
-      @cq.context.restore()
+      @cq.restore()
+      $(this).trigger('rendered')
 
     drawBody: (body) =>
       if body.GetUserData()?.draw

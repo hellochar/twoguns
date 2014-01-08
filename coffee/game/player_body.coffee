@@ -62,9 +62,6 @@ define [
 
         for methodName, impl of pbMethods
           @[methodName] = impl.bind(@)
-
-
-        @calculateVisionPoly()
       ).bind(body)()
       body.SetUserData(new PlayerUserData(body))
       return body
@@ -77,6 +74,7 @@ define [
       @jumpCounter > 0
 
     getVisionPoly: () ->
+      @calculateVisionPoly() unless @visionPoly?
       return @visionPoly
 
     # private

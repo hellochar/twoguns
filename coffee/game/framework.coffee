@@ -12,8 +12,11 @@ define [
   # induces feedback latency equal to FRAME_OFFSET * (ms per frame)
   FRAME_OFFSET = 2
 
+  TRACK_RAY_CALLS = true
+
   framework = {
     setup : (socket, playerNames, yourName) ->
+      @socket = socket
       @cq = cq().framework(this, this)
       @cq.appendTo("body")
       @input = new Inputs(
@@ -22,13 +25,29 @@ define [
       )
       @game = new Game(30, 80, playerNames, yourName)
       @renderer = new Renderer(18, @game, @cq)
-
-      @socket = socket
       @networkCollector = new InputNetworkCollector(@game.players)
       # start off by filling in the first FRAME_OFFSET inputs with no-ops
       for frame in [0...FRAME_OFFSET]
         for player in @game.players
           @networkCollector.put(player.name, (new Inputs()).toWorld(@renderer), frame)
+
+      if TRACK_RAY_CALLS?
+        ( =>
+          invocations = 0
+          indicator = $("<div/>").appendTo("body").css(
+            position: "absolute"
+            left: "0px"
+            top: "100px"
+            background: "white"
+          )
+          $(@game).on('rayintersectall', () ->
+            invocations += 1
+          )
+          $(@renderer).on('rendered', () ->
+            indicator.text("#{invocations} ray intersections!")
+            invocations = 0
+          )
+        )()
 
       @statsStep = new Stats()
       @statsStep.setMode(0)
@@ -102,6 +121,7 @@ define [
       # - or -
       # keep a list of players "connected"; disconnected players don't need input for the game to continue
       #   also account for reconnect
+      @networkCollector.removePlayer(playerName)
 
     onInputPacket: (playerName, inputSerialized, frameStamp) ->
       @networkCollector.put(playerName, Inputs.unserialize(inputSerialized), frameStamp)

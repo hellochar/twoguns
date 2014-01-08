@@ -48,10 +48,9 @@ define [
 
     poststep: () =>
       @playerBody.direction = @directionTo(@mouse.location)
-      @playerBody.calculateVisionPoly()
 
-    getVisionPoly: () =>
-      @playerBody.getVisionPoly()
+      delete @playerBody.visionPoly
+      delete @playerBody.collidedBodies
 
     directionTo: (x, y) =>
       if "x" of x and "y" of x and y == undefined
@@ -63,6 +62,13 @@ define [
 
       direction
 
+    getCollidedBodies: () =>
+      @getVisionPoly()
+      @playerBody.collidedBodies
+
+    getVisionPoly: () =>
+      @playerBody.getVisionPoly()
+
     # you can see yourself
     # if it's a block, you can see it
     # if it's a body blocking your line of sight, you can see it
@@ -70,7 +76,7 @@ define [
     canSee: (body) =>
       return true if body is @playerBody
       return true if body.GetUserData() instanceof BlockUserData
-      return true if _.contains(@playerBody.collidedBodies, body)
+      return true if _.contains(@getCollidedBodies(), body)
       return true if body.GetUserData() instanceof BulletUserData
 
     # this method should make the renderer look at you, offset by the mouse position

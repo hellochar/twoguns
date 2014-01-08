@@ -143,6 +143,7 @@ define [
       $(@).on(name, listener[name]) for name in eventNames when listener[name]?
 
     rayIntersectAll: (start, dir, filter, length = 10000) =>
+      $(@).trigger('rayintersectall')
       arr = []
       point2 = start.Copy()
       offset = dir.Copy()
