@@ -3,6 +3,7 @@ define ['b2', 'utils', 'game/render/image_cache'], (b2, Utils, ImageCache) ->
   class Renderer
     constructor: (@viewportWidth, @game, @cq) ->
       @center = new b2.Vec2() # world coordinates
+      $(@cq.canvas).css('background-color', 'black')
 
     lookAt: (center) => @center.SetV(center)
 
@@ -33,7 +34,7 @@ define ['b2', 'utils', 'game/render/image_cache'], (b2, Utils, ImageCache) ->
     render: (mx, my) =>
       @game.youPlayer.lookAt(this, mx, my)
 
-      @cq.clear("rgb(128, 128, 128)")
+      @cq.clear()
       @cq.context.save()
 
       # convert cq's transform into world coordinates
@@ -44,9 +45,16 @@ define ['b2', 'utils', 'game/render/image_cache'], (b2, Utils, ImageCache) ->
       .scale(@scale(), @scale())
       .lineWidth(1 / @scale())
 
+      @cq.fillStyle("white").globalCompositeOperation("source-over")
+      # draw the vision poly in white
+      @cq.beginPath()
+      @cq.lineTo(point.x, point.y) for point in @game.youPlayer.getVisionPoly()
+      @cq.fill()
+
+      # draw the background that you can see
+      @cq.context.globalCompositeOperation = "source-atop"
       @cq.context.save()
       @cq.scale(.2, .2)
-      @cq.translate(@center.x * 1, @center.y * 1)
       @cq.drawImage(ImageCache.get('img/bg.jpg'), -400, -420)
       @cq.context.save()
       @cq.context.setTransform(1, 0, 0, 1, 0, 0)
@@ -54,14 +62,21 @@ define ['b2', 'utils', 'game/render/image_cache'], (b2, Utils, ImageCache) ->
       @cq.context.restore()
       @cq.context.restore()
 
-      @cq.fillStyle("rgba(255, 255, 255, .8)")
-      # @cq.context.globalCompositeOperation = "source-over"
-      # draw the vision poly in white
-      @cq.beginPath()
-      @cq.lineTo(point.x, point.y) for point in @game.youPlayer.getVisionPoly()
-      @cq.fill()
+      # draw the rest of the background
+      @cq.globalCompositeOperation("source-out")
+      @cq.context.save()
+      @cq.scale(.2, .2)
+      @cq.drawImage(ImageCache.get('img/bg.jpg'), -400, -420)
+      @cq.context.save()
+      @cq.context.setTransform(1, 0, 0, 1, 0, 0)
+      @cq.clear("rgba(0, 0, 0, .9)")
+      @cq.context.restore()
+      @cq.context.restore()
 
-      # @cq.context.globalCompositeOperation = "source-atop"
+      @cq.globalCompositeOperation("source-over")
+
+
+      @cq.context.globalCompositeOperation = "source-atop"
       # @drawBody(body) for body in @game.getBodies()
       # cull off-screen bodies
       @drawBody(body) for body in @game.getBodiesInAABB(@visibleAABB())
@@ -77,7 +92,7 @@ define ['b2', 'utils', 'game/render/image_cache'], (b2, Utils, ImageCache) ->
       @cq.context.restore()
 
     drawBody: (body) =>
-      body.GetUserData()?.draw(this, => @drawBodyDefault(body))
+      body.GetUserData()?.draw(this, => @drawBodyDefault(body)) || @drawBodyDefault(body)
 
     drawBodyDefault: (body) =>
       xf = body.m_xf
