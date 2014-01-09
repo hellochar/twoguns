@@ -7,9 +7,8 @@ define [
   'multi_contact_listener',
   'game/entity/player'
   'game/random',
-  'game/player_body'
   'game/world/game_world'
-], ($, _, b2, Stats, Utils, MultiContactListener, Player, Random, PlayerBody, GameWorld) ->
+], ($, _, b2, Stats, Utils, MultiContactListener, Player, Random, GameWorld) ->
   # model of the game
   #
   #   there is a physics world, with objects etc.

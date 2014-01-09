@@ -2,7 +2,7 @@ define [
   'b2'
   'utils'
   'game/entity/entity'
-  'game/player_body'
+  'game/entity/player_body'
   'game/world/block_userdata'
   'game/world/bullet_userdata'
 ], (b2, Utils, Entity, PlayerBody, BlockUserData, BulletUserData) -> 

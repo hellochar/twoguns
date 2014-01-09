@@ -2,13 +2,9 @@ define [
   'jquery',
   'underscore',
   'b2',
-  'noise',
-  'stats',
-  'multi_contact_listener'
   'game/bullet'
-  'game/world/block_userdata'
   'game/world/bullet_userdata'
-], ($, _, b2, ClassicalNoise, Stats, MultiContactListener, Bullet, BlockUserData, BulletUserData) ->
+], ($, _, b2, Bullet, BulletUserData) ->
 
   BODYDEF = new b2.BodyDef
   BODYDEF.type = b2.Body.b2_dynamicBody
