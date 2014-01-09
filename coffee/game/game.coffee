@@ -135,6 +135,7 @@ define [
 
       @world.Step(1/30, 10, 10)
       @world.ClearForces()
+      $(@).trigger("onstep")
 
       $(@).trigger("poststep")
 
@@ -154,8 +155,8 @@ define [
         if !(filter?) or filter?(fixture, point, normal, fraction)
           arr.push(
             fixture: fixture
-            point: point
-            normal: normal
+            point: point.Copy()
+            normal: normal.Copy()
             fraction: fraction
           )
         # RayCast will keep going or stop depending on the return value; 1 means keep going
@@ -175,11 +176,8 @@ define [
       arr = @rayIntersectAll(start, dir, filter, length)
 
       if arr.length > 0
-        _.min(arr, (obj) =>
-          offset = obj.point.Copy()
-          offset.Subtract(start)
-          offset.LengthSquared()
-        )
+        #minimum by distance to start
+        _.min(arr, (obj) => obj.fraction)
       else
         undefined
 

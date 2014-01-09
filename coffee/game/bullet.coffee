@@ -24,7 +24,6 @@ define [
       fixDef.density = 0.0
       fixDef.friction = 0.0
       fixDef.restitution = 0
-      # fixDef.isSensor = true
       fixDef.shape = new b2.CircleShape(.05)
 
       @body.CreateFixture(fixDef)
