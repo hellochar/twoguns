@@ -8,8 +8,7 @@ define [
   'game/bullet'
   'game/world/block_userdata'
   'game/world/bullet_userdata'
-  'game/world/player_userdata'
-], ($, _, b2, ClassicalNoise, Stats, MultiContactListener, Bullet, BlockUserData, BulletUserData, PlayerUserData) ->
+], ($, _, b2, ClassicalNoise, Stats, MultiContactListener, Bullet, BlockUserData, BulletUserData) ->
 
   BODYDEF = new b2.BodyDef
   BODYDEF.type = b2.Body.b2_dynamicBody
@@ -61,7 +60,6 @@ define [
         for methodName, impl of pbMethods
           @[methodName] = impl.bind(@)
       ).bind(body)()
-      body.SetUserData(new PlayerUserData(body))
       return body
   }
 

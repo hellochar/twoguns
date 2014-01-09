@@ -5,7 +5,7 @@ define [
   'stats',
   'utils'
   'multi_contact_listener',
-  'game/player'
+  'game/entity/player'
   'game/random',
   'game/player_body'
   'game/world/game_world'

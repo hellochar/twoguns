@@ -6,7 +6,7 @@ define [
     draw: (renderer, defaultMethod) =>
       defaultMethod()
 
-    color: () => "green"
+    color: () => "rgba(0, 255, 0, .4)"
 
     image: () => "img/block.png"
 

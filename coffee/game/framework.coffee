@@ -5,14 +5,12 @@ define [
   'game/game'
   'game/inputs'
   'game/input_network_collector'
-  'game/player'
+  'game/entity/player'
   'game/render/renderer'
 ], (_, b2, cq, Game, Inputs, InputNetworkCollector, Player, Renderer) ->
 
   # induces feedback latency equal to FRAME_OFFSET * (ms per frame)
   FRAME_OFFSET = 2
-
-  TRACK_RAY_CALLS = true
 
   framework = {
     setup : (socket, playerNames, yourName) ->
@@ -31,23 +29,23 @@ define [
         for player in @game.players
           @networkCollector.put(player.name, (new Inputs()).toWorld(@renderer), frame)
 
-      if TRACK_RAY_CALLS?
-        ( =>
+      # track calls to rayintersect and output it
+      ( =>
+        invocations = 0
+        indicator = $("<div/>").appendTo("body").css(
+          position: "absolute"
+          left: "0px"
+          top: "100px"
+          background: "white"
+        )
+        $(@game).on('rayintersectall', () ->
+          invocations += 1
+        )
+        $(@renderer).on('rendered', () ->
+          indicator.text("#{invocations} ray intersections!")
           invocations = 0
-          indicator = $("<div/>").appendTo("body").css(
-            position: "absolute"
-            left: "0px"
-            top: "100px"
-            background: "white"
-          )
-          $(@game).on('rayintersectall', () ->
-            invocations += 1
-          )
-          $(@renderer).on('rendered', () ->
-            indicator.text("#{invocations} ray intersections!")
-            invocations = 0
-          )
-        )()
+        )
+      )()
 
       @statsStep = new Stats()
       @statsStep.setMode(0)
