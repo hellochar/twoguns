@@ -76,15 +76,16 @@ define [
       # cull off-screen bodies
       @drawBody(body) for body in @game.getBodiesInAABB(@visibleAABB()) when @game.youPlayer.canSee(body)
 
+
       # draw sightline
-      isect = @game.rayIntersect(@game.youPlayer.playerBody.GetWorldCenter(), @game.youPlayer.playerBody.direction,
+      isect = @game.rayIntersect(@game.youPlayer.body.GetWorldCenter(), @game.youPlayer.body.direction,
         ((fixture) -> not (fixture.GetBody().GetUserData() instanceof BulletUserData))
         , 100
       )
       if isect
         @cq.fillStyle("red").beginPath().circle(isect.point.x, isect.point.y, 0.035).fill()
         @cq.strokeStyle("rgba(255, 0, 0, 0.3)").beginPath().
-          moveTo(@game.youPlayer.playerBody.GetWorldCenter().x, @game.youPlayer.playerBody.GetWorldCenter().y).
+          moveTo(@game.youPlayer.body.GetWorldCenter().x, @game.youPlayer.body.GetWorldCenter().y).
           lineTo(isect.point.x, isect.point.y).
           stroke()
 
