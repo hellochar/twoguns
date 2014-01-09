@@ -6657,7 +6657,7 @@ Box2D.postDefs = [];
       var bodyB = this.m_fixtureB.GetBody();
       var shapeA = this.m_fixtureA.GetShape();
       var shapeB = this.m_fixtureB.GetShape();
-      worldManifold.Initialize(this.m_manifold, bodyA.GetTransform(), shapeA.m_radius, bodyB.GetTransform(), shapeB.m_radius);
+      worldManifold.Initialize(this.m_manifold, bodyA.GetTransform(), shapeA ? shapeA.m_radius : undefined, bodyB.GetTransform(), shapeA ? shapeA.m_radius : undefined);
    }
    b2Contact.prototype.IsTouching = function () {
       return (this.m_flags & b2Contact.e_touchingFlag) == b2Contact.e_touchingFlag;
