@@ -74,7 +74,7 @@ define [
       @cq.globalCompositeOperation("source-over")
 
       # draw bodies
-      @drawBody(body) for body in @game.getBodiesInAABB(@visibleAABB()) when @game.youPlayer.canSee(body)
+      @drawBody(body) for body in @game.getBodiesInAABB(@visibleAABB()) when @game.youPlayer.canSee(body.GetUserData())
 
 
       # draw sightline

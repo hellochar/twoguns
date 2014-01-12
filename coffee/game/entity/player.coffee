@@ -4,8 +4,8 @@ define [
   'game/entity/entity'
   'game/entity/bullet'
   'game/entity/player_body'
-  'game/world/block_userdata'
-], (b2, Utils, Entity, Bullet, PlayerBody, BlockUserData) -> 
+  'game/entity/block'
+], (b2, Utils, Entity, Bullet, PlayerBody, Block) -> 
 
   class Player extends Entity
     constructor: (@name, @game) ->
@@ -76,11 +76,11 @@ define [
     # if it's a block, you can see it
     # if it's a body blocking your line of sight, you can see it
     # if it's a bullet, you can see it
-    canSee: (body) =>
-      return true if body is @body
-      return true if body.GetUserData() instanceof BlockUserData
-      return true if _.contains(@getCollidedBodies(), body)
-      return true if body.GetUserData() instanceof Bullet
+    canSee: (entity) =>
+      return true if entity is this
+      return true if entity instanceof Block
+      return true if _.contains(@getCollidedBodies(), entity.body)
+      return true if entity instanceof Bullet
 
     shoot: (bulletType) =>
       @bullet_sound.currentTime = 0

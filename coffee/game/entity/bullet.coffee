@@ -2,8 +2,8 @@ define [
   'jquery'
   'b2'
   'game/entity/entity'
-  'game/world/block_userdata'
-], ($, b2, Entity, BlockUserData) ->
+  'game/entity/block'
+], ($, b2, Entity, Block) ->
 
   BULLET_SPEED = 50
   BULLET_RADIUS = 0.05
@@ -59,7 +59,6 @@ define [
 
     prestep: () =>
       @body.ApplyForce(@game.world.GetGravity().GetNegative(), @body.GetWorldCenter())
-
 
     poststep: () =>
       @oldPosition = @currentPosition.Copy()

@@ -2,8 +2,8 @@ define [
   'b2',
   'multi_contact_listener'
   'game/entity/wall'
-  'game/world/block_userdata'
-], (b2, MultiContactListener, Wall, BlockUserData) ->
+  'game/entity/block'
+], (b2, MultiContactListener, Wall, Block) ->
 
 
   BLOCK_BODYDEF = new b2.BodyDef
@@ -42,13 +42,7 @@ define [
             # todo: query neighbors, create contacts? e.g. make blocks free-falling?
 
     createBlock: (x, y, isStatic = true) =>
-      BLOCK_BODYDEF.type = if isStatic then b2.Body.b2_staticBody else b2.Body.b2_dynamicBody
-      BLOCK_BODYDEF.position.Set( x, y )
-      block = @CreateBody(BLOCK_BODYDEF)
-      fixture = block.CreateFixture(BLOCK_FIXDEF)
-      block.SetUserData(new BlockUserData(block))
-
-      block
+      new Block(@game, new b2.Vec2(x, y), 1, isStatic)
 
     createBoundingBoxes: (width, height) =>
       # create top/bottom
