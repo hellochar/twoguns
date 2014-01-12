@@ -29,7 +29,6 @@ define [
     mouseup: (x, y, button) =>
       @setLocation(x, y)
       @mouse.button = -1
-      @mouse.down = false
 
     toWorld: (renderer) =>
       c = @clone()

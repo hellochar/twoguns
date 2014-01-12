@@ -1,8 +1,9 @@
 define [
   'b2',
   'multi_contact_listener'
+  'game/entity/wall'
   'game/world/block_userdata'
-], (b2, MultiContactListener, BlockUserData) ->
+], (b2, MultiContactListener, Wall, BlockUserData) ->
 
 
   BLOCK_BODYDEF = new b2.BodyDef
@@ -18,8 +19,12 @@ define [
   class GameWorld extends b2.World
     constructor: (gravity, allowSleep, @game) ->
       super(gravity, allowSleep)
+      # this following line is a hack to call the rest of the super constructor correctly
       this.b2World.apply(this, [gravity, allowSleep])
+
       @SetContactListener(new MultiContactListener())
+
+    createMap: () =>
       @createBoundingBoxes(@game.width, @game.height)
       @generateNoiseBoxes(3, 1)
 
@@ -47,19 +52,11 @@ define [
 
     createBoundingBoxes: (width, height) =>
       # create top/bottom
-      BLOCK_FIXDEF.shape.SetAsBox(width/2, 1)
-      BLOCK_BODYDEF.position.Set(0, -( height/2 + 1 ) )
-      @CreateBody(BLOCK_BODYDEF).CreateFixture(BLOCK_FIXDEF)
-      BLOCK_BODYDEF.position.Set(0, +( height/2 + 1 ) )
-      @CreateBody(BLOCK_BODYDEF).CreateFixture(BLOCK_FIXDEF)
+      new Wall(@game, new b2.Vec2(0, -( height/2 + 1 ) ), width/2 + 1/2, 1)
+      new Wall(@game, new b2.Vec2(0, +( height/2 + 1 ) ), width/2 + 1/2, 1)
 
       # create left/right
-      BLOCK_FIXDEF.shape.SetAsBox(1, height/2)
-      BLOCK_BODYDEF.position.Set(-( width/2 + 1 ), 0)
-      @CreateBody(BLOCK_BODYDEF).CreateFixture(BLOCK_FIXDEF)
-      BLOCK_BODYDEF.position.Set(+( width/2 + 1 ), 0)
-      @CreateBody(BLOCK_BODYDEF).CreateFixture(BLOCK_FIXDEF)
-
-
+      new Wall(@game, new b2.Vec2(-( width/2 + 1 ), 0), 1, height/2 + 1/2)
+      new Wall(@game, new b2.Vec2(+( width/2 + 1 ), 0), 1, height/2 + 1/2)
 
   return GameWorld

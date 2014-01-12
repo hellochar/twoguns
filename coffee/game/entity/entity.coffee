@@ -8,6 +8,7 @@ define [
   #
   #   use prestep() to apply forces and otherwise prepare your Entity for the next iteration
   #   use poststep() to recalculate values that may have changed because the physics has stepped
+  #   use onstep() if your Entity doesn't belong in the physics world necessarily
   class Entity
     constructor: (@game) ->
       @game.register(this)

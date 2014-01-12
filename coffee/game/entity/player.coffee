@@ -2,14 +2,21 @@ define [
   'b2'
   'utils'
   'game/entity/entity'
+  'game/entity/bullet'
   'game/entity/player_body'
   'game/world/block_userdata'
-  'game/world/bullet_userdata'
-], (b2, Utils, Entity, PlayerBody, BlockUserData, BulletUserData) -> 
+], (b2, Utils, Entity, Bullet, PlayerBody, BlockUserData) -> 
 
   class Player extends Entity
     constructor: (@name, @game) ->
       super(@game)
+      @bullet_sound = new Audio()
+      @bullet_sound.src = "gun-gunshot-02.mp3"
+      @bullet_sound.volume = .2
+      # normalized vector representing the angle you are looking at
+      @direction = new b2.Vec2(1, 0)
+
+
 
     makeBody: () => PlayerBody.create(@)
 
@@ -39,11 +46,11 @@ define [
       if @inputs.pressed('s')
         @body.ApplyImpulse(IMPULSE_JUMP.Copy().Multiply(1/10), loc)
 
-      if @mouse.button >= 0
-        @body.shoot({0: "destroy", 2: "create"}[@mouse.button])
+      if @mouse.down
+        @shoot({0: "destroy", 2: "create"}[@mouse.button])
 
     poststep: () =>
-      @body.direction = @directionTo(@mouse.location)
+      @direction = @directionTo(@mouse.location)
 
       delete @body.visionPoly
       delete @body.collidedBodies
@@ -73,7 +80,19 @@ define [
       return true if body is @body
       return true if body.GetUserData() instanceof BlockUserData
       return true if _.contains(@getCollidedBodies(), body)
-      return true if body.GetUserData() instanceof BulletUserData
+      return true if body.GetUserData() instanceof Bullet
+
+    shoot: (bulletType) =>
+      @bullet_sound.currentTime = 0
+      @bullet_sound.play()
+
+      pos = @body.GetWorldCenter().Copy()
+      positionOffset = @direction.Copy()
+      DISTANCE_OFFSET = .5
+      positionOffset.Multiply(DISTANCE_OFFSET)
+      pos.Add(positionOffset)
+
+      new Bullet(@, pos, @direction, bulletType)
 
     # this method should make the renderer look at you, offset by the mouse position
     lookAt: (renderer, mx, my) =>
@@ -86,7 +105,7 @@ define [
       # draw a head on top
       cq = renderer.cq
       cq.save().translate(@body.GetWorldCenter().x, @body.GetWorldCenter().y)
-        .translate(0, -0.4).rotate(Math.atan2(@body.direction.y, @body.direction.x) + Math.PI / 2)
+        .translate(0, -0.4).rotate(Math.atan2(@direction.y, @direction.x) + Math.PI / 2)
         .fillStyle(@color()).strokeStyle("red")
         .beginPath()
         .moveTo(-0.1, 0)

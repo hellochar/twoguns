@@ -5,10 +5,11 @@ define [
   'stats',
   'utils'
   'multi_contact_listener',
+  'game/entity/entity'
   'game/entity/player'
   'game/random',
   'game/world/game_world'
-], ($, _, b2, Stats, Utils, MultiContactListener, Player, Random, GameWorld) ->
+], ($, _, b2, Stats, Utils, MultiContactListener, Entity, Player, Random, GameWorld) ->
   # model of the game
   #
   #   there is a physics world, with objects etc.
@@ -20,6 +21,7 @@ define [
     constructor: (@width, @height, playerNames, yourName, @random = new Random()) ->
       @entities = []
       @world = new GameWorld(new b2.Vec2(0, 8), true, this)
+      @world.createMap()
 
       @players = (new Player(name, this) for name in playerNames)
       @youPlayer = ( =>
@@ -139,7 +141,8 @@ define [
       $(@).trigger("poststep")
 
     register: (listener) =>
-      eventNames = ["prestep", "poststep"]
+      @entities.push(listener) if listener instanceof Entity
+      eventNames = ["prestep", "poststep", "onstep"]
       $(@).on(name, listener[name]) for name in eventNames when listener[name]?
 
     rayIntersectAll: (start, dir, filter, length) =>

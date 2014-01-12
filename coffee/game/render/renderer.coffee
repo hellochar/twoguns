@@ -2,9 +2,9 @@ define [
   'jquery'
   'b2'
   'utils'
-  'game/world/bullet_userdata'
+  'game/entity/bullet'
   'game/render/image_cache'
-], ($, b2, Utils, BulletUserData, ImageCache) ->
+], ($, b2, Utils, Bullet, ImageCache) ->
 
   class Renderer
     constructor: (@viewportWidth, @game, @cq) ->
@@ -73,13 +73,13 @@ define [
 
       @cq.globalCompositeOperation("source-over")
 
-      # cull off-screen bodies
+      # draw bodies
       @drawBody(body) for body in @game.getBodiesInAABB(@visibleAABB()) when @game.youPlayer.canSee(body)
 
 
       # draw sightline
-      isect = @game.rayIntersect(@game.youPlayer.body.GetWorldCenter(), @game.youPlayer.body.direction,
-        ((fixture) -> not (fixture.GetBody().GetUserData() instanceof BulletUserData))
+      isect = @game.rayIntersect(@game.youPlayer.body.GetWorldCenter(), @game.youPlayer.direction,
+        ((fixture) -> not (fixture.GetBody().GetUserData() instanceof Bullet))
         , 100
       )
       if isect

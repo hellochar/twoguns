@@ -2,9 +2,8 @@ define [
   'jquery',
   'underscore',
   'b2',
-  'game/bullet'
-  'game/world/bullet_userdata'
-], ($, _, b2, Bullet, BulletUserData) ->
+  'game/entity/bullet'
+], ($, _, b2, Bullet) ->
 
   BODYDEF = new b2.BodyDef
   BODYDEF.type = b2.Body.b2_dynamicBody
@@ -42,8 +41,6 @@ define [
         @game = game
         @world = @game.world
 
-        # normalized vector representing the angle you are looking at
-        @direction = new b2.Vec2(1, 0)
 
         @jumpCounter = 0
         $(@feet).on("begincontact", (evt, contact, myFixture, otherFixture) =>
@@ -73,10 +70,10 @@ define [
     calculateVisionPoly: () ->
       poly = []
       @collidedBodies = []
-      for angle in [0..Math.PI*2] by (Math.PI*2) / 200
+      for angle in [0..Math.PI*2] by (Math.PI*2) / 100
         dir = new b2.Vec2(Math.cos(angle), Math.sin(angle))
         isect = @game.rayIntersect(@GetWorldCenter(), dir,
-          (fixture) => fixture.GetBody() isnt this and not (fixture.GetBody().GetUserData() instanceof BulletUserData),
+          (fixture) => fixture.GetBody() isnt this and not (fixture.GetBody().GetUserData() instanceof Bullet),
           30
         )
         @collidedBodies.push(isect?.fixture.GetBody())
@@ -91,9 +88,8 @@ define [
       @visionPoly = poly
 
     shoot: (bulletType) ->
-      bodyDef = new b2.BodyDef()
-      bodyDef.type = b2.Body.b2_dynamicBody
-      bodyDef.bullet = true
+      @bullet_sound.currentTime = 0
+      @bullet_sound.play()
 
       pos = @GetWorldCenter().Copy()
       positionOffset = @direction.Copy()
