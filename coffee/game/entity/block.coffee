@@ -21,6 +21,9 @@ define [
       body.CreateFixture(fixDef)
       body
 
+    isVisible: (player) =>
+      true
+
     draw: (renderer, defaultMethod) =>
       super(renderer, defaultMethod)
 

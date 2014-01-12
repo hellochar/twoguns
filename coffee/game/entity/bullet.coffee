@@ -56,6 +56,7 @@ define [
       body.CreateFixture(fixDef)
       body
 
+    isVisible: (player) => true
 
     prestep: () =>
       @body.ApplyForce(@game.world.GetGravity().GetNegative(), @body.GetWorldCenter())

@@ -72,10 +72,8 @@ define [
       @cq.context.restore()
 
       @cq.globalCompositeOperation("source-over")
-
       # draw bodies
-      @drawBody(body) for body in @game.getBodiesInAABB(@visibleAABB()) when @game.youPlayer.canSee(body.GetUserData())
-
+      @drawBody(body) for body in @game.getBodiesInAABB(@visibleAABB()) when body.GetUserData().isVisible(@game.youPlayer)
 
       # draw sightline
       isect = @game.rayIntersect(@game.youPlayer.body.GetWorldCenter(), @game.youPlayer.direction,

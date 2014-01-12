@@ -72,15 +72,8 @@ define [
     getVisionPoly: () =>
       @body.getVisionPoly()
 
-    # you can see yourself
-    # if it's a block, you can see it
-    # if it's a body blocking your line of sight, you can see it
-    # if it's a bullet, you can see it
-    canSee: (entity) =>
-      return true if entity is this
-      return true if entity instanceof Block
-      return true if _.contains(@getCollidedBodies(), entity.body)
-      return true if entity instanceof Bullet
+    isVisible: (player) =>
+      ( player is this ) or super(player)
 
     shoot: (bulletType) =>
       @bullet_sound.currentTime = 0

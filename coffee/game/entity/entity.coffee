@@ -1,5 +1,6 @@
 define [
-], () ->
+  'underscore'
+], (_) ->
   # An Entity is something that exists in the Game Model - this can be a Player, a Block, a Bullet, etc.
   # It has methods dealing with stepping
   # Most Entities will have a Box2D body associated with it, along with logic
@@ -14,6 +15,14 @@ define [
       @game.register(this)
       @body = @makeBody() if @makeBody?
       @body.SetUserData(this)
+
+    # by default, checks if this body blocked the line of sight
+    # todo: maybe also check if this entity is in the visible poly?
+    isVisible: (player) =>
+      if @body
+        _.contains(player.getCollidedBodies(), @body)
+      else
+        false
 
     # todo:
     #   phase out defaultMethod; implement it here
