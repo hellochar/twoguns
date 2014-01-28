@@ -5,11 +5,12 @@ define [
   'stats',
   'utils'
   'multi_contact_listener',
+  'mixin/registerable'
   'game/entity/entity'
   'game/entity/player'
   'game/random',
   'game/world/game_world'
-], ($, _, b2, Stats, Utils, MultiContactListener, Entity, Player, Random, GameWorld) ->
+], ($, _, b2, Stats, Utils, MultiContactListener, Registerable, Entity, Player, Random, GameWorld) ->
   # model of the game
   #
   #   there is a physics world, with objects etc.
@@ -18,6 +19,7 @@ define [
   #   there is a win/lose condition
 
   class Game
+    Utils.make(this, Registerable("prestep", "poststep", "onstep"))
     constructor: (@width, @height, playerNames, yourName, @random = new Random()) ->
       @entities = []
       @world = new GameWorld(new b2.Vec2(0, 8), true, this)
@@ -140,11 +142,6 @@ define [
 
       $(@).trigger("poststep")
 
-    register: (listener) =>
-      @entities.push(listener) if listener instanceof Entity
-      eventNames = ["prestep", "poststep", "onstep"]
-      $(@).on(name, listener[name]) for name in eventNames when listener[name]?
-
     rayIntersectAll: (start, dir, filter, length) =>
       $(@).trigger('rayintersectall')
       arr = []
@@ -197,6 +194,16 @@ define [
     hashCode: () =>
       numbers = _.flatten([[b.GetWorldCenter().x, b.GetWorldCenter().y] for b in @getBodies()])
       _.reduce(numbers, ((accum, num) -> accum + num), 0)
+
+    findEmptyAABB: (rectWidth, rectHeight) =>
+      aabb = new b2.AABB()
+      while true
+        aabb.lowerBound.Set(@random.float(-@width/2, @width/2), @random.float(-@height/2, @height/2))
+        aabb.upperBound.Set(aabb.lowerBound.x + rectWidth, aabb.lowerBound.y + rectHeight)
+
+        break if _.isEmpty(@getBodiesInAABB(aabb))
+      aabb
+
 
 
   return Game

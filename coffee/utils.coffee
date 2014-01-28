@@ -14,6 +14,9 @@ define [
         arr.push(nexts)
         nexts = nexts.m_next
       arr
+
+    make: (klass, obj) ->
+      _.extend(klass.prototype, obj)
   }
 
   Utils

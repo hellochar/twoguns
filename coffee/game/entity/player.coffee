@@ -20,6 +20,9 @@ define [
 
     makeBody: () => PlayerBody.create(@)
 
+    onBodyDestroyed: () =>
+
+
     prestep: () =>
       @mouse = @inputs.mouse
       IMPULSE_JUMP = new b2.Vec2(0, -0.04 / @body.GetMass())

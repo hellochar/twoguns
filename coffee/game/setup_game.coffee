@@ -1,8 +1,14 @@
-require ['jquery', 'underscore', 'socket.io', 'game/framework'], ($, _, io, framework) ->
+require [
+  'jquery'
+  'underscore'
+  'socket.io'
+  'game/framework'
+], ($, _, io, framework) ->
+  $("<script src='http://"+window.location.hostname+":35729/livereload.js'></scr" + "ipt>").appendTo("head")
 
   window.framework = framework
 
-  AUTOSTART = true
+  AUTOSTART_PLAYERS = 1
 
 
   randomName = (String.fromCharCode(65 + Math.random() * 26) for x in [0..8]).join("")
@@ -17,7 +23,7 @@ require ['jquery', 'underscore', 'socket.io', 'game/framework'], ($, _, io, fram
     currentPlayers: []
   }
 
-  socket = io.connect('http://localhost')
+  socket = io.connect()
   socket.emit('join', randomName)
 
   # called whenever the lobby gets updated
@@ -28,7 +34,7 @@ require ['jquery', 'underscore', 'socket.io', 'game/framework'], ($, _, io, fram
       $("#players").append("<p>#{player.name}</p>")
     )
 
-    if AUTOSTART?
+    if _.size(currentPlayers) >= AUTOSTART_PLAYERS
       socket.emit('start')
   )
   socket.on('gamestart', () ->

@@ -14,6 +14,13 @@ define [
     perlin: (x, y, z) =>
       @perlinNoise.noise(x, y, z)
 
+    float: (low, high) =>
+      if not low
+        low = 1
+      if not high
+        [high, low] = [low, 0]
+      @myRandom.random() * (high - low) + low
+
 
 
   Random

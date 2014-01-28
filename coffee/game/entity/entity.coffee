@@ -12,6 +12,8 @@ define [
   #   use onstep() if your Entity doesn't belong in the physics world necessarily
   class Entity
     constructor: (@game) ->
+      # this method serves the dual purpose of hooking up the game to this entity
+      @game.entities.push(this)
       @game.register(this)
       @body = @makeBody() if @makeBody?
       @body.SetUserData(this)

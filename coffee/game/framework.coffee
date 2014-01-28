@@ -22,6 +22,7 @@ define [
         {}
       )
       @game = new Game(30, 80, playerNames, yourName)
+      window.you = @game.youPlayer
       @renderer = new Renderer(18, @game, @cq)
       @networkCollector = new InputNetworkCollector(@game.players)
       # start off by filling in the first FRAME_OFFSET inputs with no-ops

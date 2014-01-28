@@ -7,7 +7,6 @@ define [
 
   BODYDEF = new b2.BodyDef
   BODYDEF.type = b2.Body.b2_dynamicBody
-  BODYDEF.position.Set(0, 0)
   BODYDEF.fixedRotation = true
   BODYDEF.allowSleep = false
 
@@ -20,6 +19,9 @@ define [
   PlayerBody = {
     create: (player, height = 0.6, width = 0.2) =>
       game = player.game
+      # find a nice spot
+      pos = game.findEmptyAABB(1, .5)
+      BODYDEF.position.SetV(pos.lowerBound)
       body = game.world.CreateBody(BODYDEF)
 
       (->
