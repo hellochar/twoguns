@@ -1,9 +1,10 @@
 define [
+  'jquery'
   'b2',
   'multi_contact_listener'
   'game/entity/wall'
   'game/entity/block'
-], (b2, MultiContactListener, Wall, Block) ->
+], ($, b2, MultiContactListener, Wall, Block) ->
 
 
   BLOCK_BODYDEF = new b2.BodyDef
@@ -52,5 +53,10 @@ define [
       # create left/right
       new Wall(@game, new b2.Vec2(-( width/2 + 1 ), 0), 1, height/2 + 1/2)
       new Wall(@game, new b2.Vec2(+( width/2 + 1 ), 0), 1, height/2 + 1/2)
+
+    # DestroyBody: (b) =>
+    #   super(b)
+    #   $(b).trigger("destroyed")
+    #   $(this).trigger("destroyBody", b)
 
   return GameWorld

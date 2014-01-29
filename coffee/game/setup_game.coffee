@@ -8,7 +8,7 @@ require [
 
   window.framework = framework
 
-  AUTOSTART_PLAYERS = 1
+  # AUTOSTART_PLAYERS = 2
 
 
   randomName = (String.fromCharCode(65 + Math.random() * 26) for x in [0..8]).join("")
@@ -34,13 +34,16 @@ require [
       $("#players").append("<p>#{player.name}</p>")
     )
 
-    if _.size(currentPlayers) >= AUTOSTART_PLAYERS
+    if !!(AUTOSTART_PLAYERS?) and _.size(currentPlayers) >= AUTOSTART_PLAYERS
       socket.emit('start')
   )
   socket.on('gamestart', () ->
-    yourName = randomName
-    framework.setup(socket, _.map(lobby.currentPlayers, (p) -> p.name), yourName)
-    $("#lobby").hide()
+    if !framework.isRunning()
+      yourName = randomName
+      framework.setup(socket, _.map(lobby.currentPlayers, (p) -> p.name), yourName)
+      $("#lobby").hide()
+    else
+      console.log("got multiple gamestarts!")
   )
 
   # called when the game has started and a player drops

@@ -18,12 +18,13 @@ define [
       $(@body).on("begincontact", (evt, contact, myFixture, otherFixture) =>
         if contact.IsTouching()
           @game.delegates.push( =>
-            @game.world.DestroyBody(@body)
+            @destroy(this)
           )
           $(@body).off("begincontact")
 
           if @bulletType is "destroy"
-            @game.delegates.push(=>@game.world.DestroyBody(otherFixture.GetBody()))
+            otherEntity = otherFixture.GetBody().GetUserData()
+            @game.delegates.push( => otherEntity.destroy(this))
           else if @bulletType is "create"
             @game.delegates.push(=>
               blockCenter = @body.GetWorldCenter()
@@ -35,6 +36,8 @@ define [
             )
 
       )
+
+      $(this).on("gotDestroyed", @unregister)
 
     makeBody: () =>
       bodyDef = new b2.BodyDef()

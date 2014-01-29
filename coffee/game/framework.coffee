@@ -13,7 +13,11 @@ define [
   FRAME_OFFSET = 2
 
   framework = {
+    isRunning: () -> !!@hasSetup
+
     setup : (socket, playerNames, yourName) ->
+      throw new Error("framework.setup() called more than once!") if @isRunning()
+      @hasSetup = true
       @socket = socket
       @cq = cq().framework(this, this)
       @cq.appendTo("body")
@@ -21,7 +25,7 @@ define [
         {x: @cq.canvas.width/2, y: @cq.canvas.height/2},
         {}
       )
-      @game = new Game(30, 80, playerNames, yourName)
+      @game = new Game(36, 10, playerNames, yourName)
       window.you = @game.youPlayer
       @renderer = new Renderer(18, @game, @cq)
       @networkCollector = new InputNetworkCollector(@game.players)

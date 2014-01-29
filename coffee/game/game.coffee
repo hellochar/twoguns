@@ -26,10 +26,11 @@ define [
       @world.createMap()
 
       @players = (new Player(name, this) for name in playerNames)
-      @youPlayer = ( =>
-        yourIndex = playerNames.indexOf(yourName)
-        @players[yourIndex]
-      )()
+      @youPlayer = _.findWhere(@players, {name: yourName})
+      $(@youPlayer).on("gotDestroyed", (who) ->
+        alert("you died!")
+        console.log("you got killed by", who)
+      )
 
       # callbacks to be invoked right before the game steps
       # Use this to e.g. add and remove blocks that you can't do during

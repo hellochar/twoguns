@@ -1,11 +1,12 @@
 define [
+  'jquery'
   'b2'
   'utils'
   'game/entity/entity'
   'game/entity/bullet'
   'game/entity/player_body'
   'game/entity/block'
-], (b2, Utils, Entity, Bullet, PlayerBody, Block) -> 
+], (jquery, b2, Utils, Entity, Bullet, PlayerBody, Block) -> 
 
   class Player extends Entity
     constructor: (@name, @game) ->
@@ -16,12 +17,13 @@ define [
       # normalized vector representing the angle you are looking at
       @direction = new b2.Vec2(1, 0)
 
-
+      $(this).on("gotDestroyed", (who) =>
+        setTimeout(() =>
+          @constructBody()
+        , 3000)
+      )
 
     makeBody: () => PlayerBody.create(@)
-
-    onBodyDestroyed: () =>
-
 
     prestep: () =>
       @mouse = @inputs.mouse

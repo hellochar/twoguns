@@ -15,6 +15,9 @@ define [
       # this method serves the dual purpose of hooking up the game to this entity
       @game.entities.push(this)
       @game.register(this)
+      @constructBody()
+
+    constructBody: () =>
       @body = @makeBody() if @makeBody?
       @body.SetUserData(this)
 
@@ -31,5 +34,16 @@ define [
     #   set the renderer's transform, or at least provide lots of convenience methods
     draw: (renderer, defaultMethod) =>
       defaultMethod()
+
+    # destroy this Entity's body; pass an optional (who) parameter to designate who destroyed it
+    destroy: (who) =>
+      @game.world.DestroyBody(@body)
+      $(this).trigger("gotDestroyed", who)
+      $(who).trigger("destroyed", this) if who
+
+    # removes this entity from the game
+    unregister: () =>
+      @game.entities = _.without(@game.entities, this)
+      @game.unregister(this)
 
   Entity
