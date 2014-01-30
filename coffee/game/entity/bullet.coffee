@@ -1,9 +1,8 @@
 define [
-  'jquery',
-  'b2',
-  'game/entity/entity',
-  'game/entity/player',
-], ($, b2, Entity, Player) ->
+  'jquery'
+  'b2'
+  'game/entity/entity'
+], ($, b2, Entity) ->
 
   BULLET_SPEED = 50
   BULLET_RADIUS = 0.05
@@ -39,7 +38,8 @@ define [
 
       $(this).on("gotDestroyed", @unregister)
       $(this).on("destroyed", (evt, what) =>
-        return unless what instanceof window.Player
+        # use class type of @player instead of explicitly specifying Player to remove circular dependency
+        return unless what instanceof @player.constructor
         @player.score += 1
       )
 

@@ -131,10 +131,4 @@ define [
 
     toString: () => "[#{@name} (#{@index})]"
 
-
-
-
-  console.log("setting window.Player to", Player)
-  window.Player = Player
   return Player
-

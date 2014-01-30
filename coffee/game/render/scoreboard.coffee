@@ -18,7 +18,7 @@ define [
 
     poststep: () =>
       @el.empty()
-      for player, idx in _.sortBy(@game.players, (player) -> -1 * player.score)
+      for player in _.sortBy(@game.players, (player) -> -1 * player.score)
         row = $("<div>").text("#{player.name} - #{player.score}").appendTo(@el)
         if player is @game.youPlayer
           row.css("background-color", "black")
