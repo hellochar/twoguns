@@ -4,13 +4,14 @@ define [
   'b2',
   'stats',
   'utils'
+  'overlay'
   'multi_contact_listener',
   'mixin/registerable'
   'game/entity/entity'
   'game/entity/player'
   'game/random',
   'game/world/game_world'
-], ($, _, b2, Stats, Utils, MultiContactListener, Registerable, Entity, Player, Random, GameWorld) ->
+], ($, _, b2, Stats, Utils, Overlay, MultiContactListener, Registerable, Entity, Player, Random, GameWorld) ->
   # model of the game
   #
   #   there is a physics world, with objects etc.
@@ -25,11 +26,10 @@ define [
       @world = new GameWorld(new b2.Vec2(0, 8), true, this)
       @world.createMap()
 
-      @players = (new Player(name, this) for name in playerNames)
+      @players = (new Player(name, this, playerIndex) for name, playerIndex in playerNames)
       @youPlayer = _.findWhere(@players, {name: yourName})
-      $(@youPlayer).on("gotDestroyed", (who) ->
-        alert("you died!")
-        console.log("you got killed by", who)
+      $(@youPlayer).on("gotDestroyed", (evt, bullet) ->
+        Overlay.show("You got killed by #{bullet.player.name}!")
       )
 
       # callbacks to be invoked right before the game steps

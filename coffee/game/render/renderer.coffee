@@ -1,14 +1,17 @@
 define [
   'jquery'
+  'underscore'
   'b2'
   'utils'
   'game/entity/bullet'
+  'game/render/scoreboard'
   'game/render/image_cache'
-], ($, b2, Utils, Bullet, ImageCache) ->
+], ($, _, b2, Utils, Bullet, Scoreboard, ImageCache) ->
 
   class Renderer
     constructor: (@viewportWidth, @game, @cq) ->
       @center = new b2.Vec2() # world coordinates
+      @scoreboard = new Scoreboard(@game)
       $(@cq.canvas).css('background-color', 'black')
 
     lookAt: (center) => @center.SetV(center)
@@ -38,10 +41,15 @@ define [
 
     #mouse x and y in screen coordinates; still needed for now but should be removed soon
     render: (mx, my) =>
+      @cq.clear()
+      @renderWorld(mx, my)
+      $(this).trigger('rendered')
+
+    renderWorld: (mx, my) =>
+
+      @cq.save()
       @game.youPlayer.lookAt(this, mx, my)
 
-      @cq.clear()
-      @cq.save()
 
       # convert cq's transform into world coordinates
       @cq
@@ -76,10 +84,12 @@ define [
       @drawBody(body) for body in @game.getBodiesInAABB(@visibleAABB()) when body.GetUserData().isVisible(@game.youPlayer)
 
       # draw sightline
-      isect = @game.rayIntersect(@game.youPlayer.body.GetWorldCenter(), @game.youPlayer.direction,
-        ((fixture) -> not (fixture.GetBody().GetUserData() instanceof Bullet))
-        , 100
-      )
+      if @game.youPlayer.body
+        isect = @game.rayIntersect(@game.youPlayer.body.GetWorldCenter(), @game.youPlayer.direction,
+          ((fixture) -> not (fixture.GetBody().GetUserData() instanceof Bullet))
+          , 100
+        )
+
       if isect
         @cq.fillStyle("red").beginPath().circle(isect.point.x, isect.point.y, 0.035).fill()
         @cq.strokeStyle("rgba(255, 0, 0, 0.3)").beginPath().
@@ -89,7 +99,7 @@ define [
 
       # restore global context
       @cq.restore()
-      $(this).trigger('rendered')
+
 
     drawBody: (body) =>
       if body.GetUserData()?.draw

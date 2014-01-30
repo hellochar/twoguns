@@ -40,6 +40,7 @@ define [
       @game.world.DestroyBody(@body)
       $(this).trigger("gotDestroyed", who)
       $(who).trigger("destroyed", this) if who
+      delete @body
 
     # removes this entity from the game
     unregister: () =>

@@ -25,4 +25,7 @@ define [
     draw: (renderer, defaultMethod) =>
       defaultMethod()
 
+    # no-op for destroy
+    destroy: (who) =>
+
     color: () => "black"

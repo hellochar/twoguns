@@ -1,9 +1,9 @@
 define [
-  'jquery'
-  'b2'
-  'game/entity/entity'
-  'game/entity/block'
-], ($, b2, Entity, Block) ->
+  'jquery',
+  'b2',
+  'game/entity/entity',
+  'game/entity/player',
+], ($, b2, Entity, Player) ->
 
   BULLET_SPEED = 50
   BULLET_RADIUS = 0.05
@@ -26,8 +26,8 @@ define [
             otherEntity = otherFixture.GetBody().GetUserData()
             @game.delegates.push( => otherEntity.destroy(this))
           else if @bulletType is "create"
+            blockCenter = @body.GetWorldCenter()
             @game.delegates.push(=>
-              blockCenter = @body.GetWorldCenter()
               direction = contact.GetManifold().m_localPoint
               length = direction.Normalize()
               direction.Multiply(length - BULLET_RADIUS)
@@ -38,6 +38,10 @@ define [
       )
 
       $(this).on("gotDestroyed", @unregister)
+      $(this).on("destroyed", (evt, what) =>
+        return unless what instanceof window.Player
+        @player.score += 1
+      )
 
     makeBody: () =>
       bodyDef = new b2.BodyDef()

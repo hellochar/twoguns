@@ -5,9 +5,8 @@ define [
   'game/game'
   'game/inputs'
   'game/input_network_collector'
-  'game/entity/player'
   'game/render/renderer'
-], (_, b2, cq, Game, Inputs, InputNetworkCollector, Player, Renderer) ->
+], (_, b2, cq, Game, Inputs, InputNetworkCollector, Renderer) ->
 
   # induces feedback latency equal to FRAME_OFFSET * (ms per frame)
   FRAME_OFFSET = 2
@@ -25,7 +24,7 @@ define [
         {x: @cq.canvas.width/2, y: @cq.canvas.height/2},
         {}
       )
-      @game = new Game(36, 10, playerNames, yourName)
+      @game = new Game(10, 10, playerNames, yourName)
       window.you = @game.youPlayer
       @renderer = new Renderer(18, @game, @cq)
       @networkCollector = new InputNetworkCollector(@game.players)
@@ -122,7 +121,8 @@ define [
       # - or -
       # keep a list of players "connected"; disconnected players don't need input for the game to continue
       #   also account for reconnect
-      @networkCollector.removePlayer(playerName)
+      if @networkCollector
+        @networkCollector.removePlayer(playerName)
 
     onInputPacket: (playerName, inputSerialized, frameStamp) ->
       @networkCollector.put(playerName, Inputs.unserialize(inputSerialized), frameStamp)

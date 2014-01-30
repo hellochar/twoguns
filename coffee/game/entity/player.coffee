@@ -2,15 +2,18 @@ define [
   'jquery'
   'b2'
   'utils'
+  'overlay'
   'game/entity/entity'
   'game/entity/bullet'
   'game/entity/player_body'
   'game/entity/block'
-], (jquery, b2, Utils, Entity, Bullet, PlayerBody, Block) -> 
+], (jquery, b2, Utils, Overlay, Entity, Bullet, PlayerBody, Block) ->
 
   class Player extends Entity
-    constructor: (@name, @game) ->
+    constructor: (@name, @game, @index) ->
       super(@game)
+      @score = 0
+
       @bullet_sound = new Audio()
       @bullet_sound.src = "gun-gunshot-02.mp3"
       @bullet_sound.volume = .2
@@ -20,6 +23,7 @@ define [
       $(this).on("gotDestroyed", (who) =>
         setTimeout(() =>
           @constructBody()
+          Overlay.hide()
         , 3000)
       )
 
@@ -27,6 +31,7 @@ define [
 
     prestep: () =>
       @mouse = @inputs.mouse
+      return unless @body
       IMPULSE_JUMP = new b2.Vec2(0, -0.04 / @body.GetMass())
       IMPULSE_DOWN = new b2.Vec2(0, -0.04 / @body.GetMass())
       FORCE_WALK_X = 4.0
@@ -55,6 +60,7 @@ define [
         @shoot({0: "destroy", 2: "create"}[@mouse.button])
 
     poststep: () =>
+      return unless @body
       @direction = @directionTo(@mouse.location)
 
       delete @body.visionPoly
@@ -71,16 +77,23 @@ define [
       direction
 
     getCollidedBodies: () =>
-      @getVisionPoly()
-      @body.collidedBodies
+      if @body
+        @getVisionPoly()
+        @body.collidedBodies
+      else
+        []
 
     getVisionPoly: () =>
-      @body.getVisionPoly()
+      if @body
+        @body.getVisionPoly()
+      else
+        []
 
     isVisible: (player) =>
       ( player is this ) or super(player)
 
     shoot: (bulletType) =>
+      return unless @body
       @bullet_sound.currentTime = 0
       @bullet_sound.play()
 
@@ -95,10 +108,12 @@ define [
     # this method should make the renderer look at you, offset by the mouse position
     lookAt: (renderer, mx, my) =>
       # these two methods MUST go together for it to work; kinda janky
+      return unless @body
       renderer.lookAt(@body.GetPosition())
       renderer.center.SetV(renderer.worldVec2(new b2.Vec2(mx, my)))
 
     draw: (renderer, defaultMethod) =>
+      return unless @body
       defaultMethod()
       # draw a head on top
       cq = renderer.cq
@@ -114,8 +129,12 @@ define [
         .restore()
     color: () => "rgb(255, 255, 0)"
 
+    toString: () => "[#{@name} (#{@index})]"
 
 
 
+
+  console.log("setting window.Player to", Player)
+  window.Player = Player
   return Player
 
