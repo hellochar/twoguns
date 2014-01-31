@@ -14,11 +14,15 @@ app.configure(function() {
 
 app.get(/^\/(\d+)/, function (req, res) {
     res.sendfile("room.html")
-})
+});
 
 app.get('/', function (req, res) {
     res.send("type in a room id")
-})
+});
+
+app.get("/lobby_list.json", function (req, res) {
+    res.json({lobbies: lobbies})
+});
 
 io.set('log level', 3);
 
