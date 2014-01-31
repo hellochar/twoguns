@@ -1,4 +1,4 @@
 module.exports = {
-    port: 3000,
+    port: process.env.PORT,
     socket_io_log_level : 2,
 }
