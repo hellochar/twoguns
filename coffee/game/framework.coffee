@@ -2,29 +2,31 @@ define [
   'underscore'
   'b2'
   'canvasquery'
+  'overlay'
   'game/game'
   'game/inputs'
   'game/input_network_collector'
   'game/render/renderer'
-], (_, b2, cq, Game, Inputs, InputNetworkCollector, Renderer) ->
+], (_, b2, cq, Overlay, Game, Inputs, InputNetworkCollector, Renderer) ->
 
   # induces feedback latency equal to FRAME_OFFSET * (ms per frame)
-  FRAME_OFFSET = 2
+  FRAME_OFFSET = 1
 
   framework = {
     isRunning: () -> !!@hasSetup
 
-    setup : (socket, playerNames, yourName) ->
+    setup : (socket, gameProperties) ->
       throw new Error("framework.setup() called more than once!") if @isRunning()
       @hasSetup = true
       @socket = socket
+      @gameProperties = gameProperties
       @cq = cq().framework(this, this)
       @cq.appendTo("body")
       @input = new Inputs(
         {x: @cq.canvas.width/2, y: @cq.canvas.height/2},
         {}
       )
-      @game = new Game(10, 10, playerNames, yourName)
+      @game = new Game(10, 10, gameProperties.playerNames, gameProperties.yourName)
       window.you = @game.youPlayer
       @renderer = new Renderer(18, @game, @cq)
       @networkCollector = new InputNetworkCollector(@game.players)
@@ -83,9 +85,20 @@ define [
 
         @networkCollector.loadFrame()
         @game.step()
+        @checkWinCondition()
         #hack; should be part of a feature to collect all events that have happened since last step
         @input.mouse.down = false
         @statsStep.end()
+
+
+    checkWinCondition: () ->
+      winningPlayer = _.findWhere(@game.players, {score: @gameProperties.scoreLimit})
+      return if not winningPlayer
+      if winningPlayer is @game.youPlayer
+        Overlay.show("You win!!!")
+      else
+        Overlay.show("#{winningPlayer.name} won!")
+
 
     # rendering loop
     onRender: (delta, time) ->

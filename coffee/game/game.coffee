@@ -28,6 +28,7 @@ define [
 
       @players = (new Player(name, this, playerIndex) for name, playerIndex in playerNames)
       @youPlayer = _.findWhere(@players, {name: yourName})
+      throw new Error("Couldn't find you!") if not @youPlayer
       $(@youPlayer).on("gotDestroyed", (evt, bullet) ->
         Overlay.show("You got killed by #{bullet.player.name}!")
       )

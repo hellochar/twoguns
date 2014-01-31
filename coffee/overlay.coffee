@@ -4,11 +4,14 @@ define [
 ], ($, _) ->
   class Overlay
     @div: $("#overlay")
-    
-    @show: (text, time) =>
-      @div.find(".text").text(text)
-      @div.show()
-      setTimeout(@hide, time) if time
 
-    @hide: () =>
-      @div.hide()
+    @show: (text, fadeTime) =>
+      @text(text)
+      # @div.show()
+      @div.fadeIn(fadeTime || 100)
+
+    @text: (text) =>
+      @div.find(".text").text(text)
+
+    @hide: (fadeTime) =>
+      @div.fadeOut(fadeTime || 100)

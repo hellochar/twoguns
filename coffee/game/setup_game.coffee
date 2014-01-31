@@ -2,45 +2,36 @@ require [
   'jquery'
   'underscore'
   'socket.io'
+  'lobby'
   'game/framework'
-], ($, _, io, framework) ->
+], ($, _, io, Lobby, framework) ->
   $("<script src='http://"+window.location.hostname+":35729/livereload.js'></scr" + "ipt>").appendTo("head")
 
   window.framework = framework
 
   # AUTOSTART_PLAYERS = 1
+  
 
-
-  randomName = (String.fromCharCode(65 + Math.random() * 26) for x in [0..8]).join("")
-  $("#lobby").append("<h3> Players: </h3><div id='players'></div>")
-
-  $("<button>Start</button>").appendTo("#lobby").on("click", (evt) ->
-    socket.emit('start')
-  )
-
-
-  lobby = {
-    currentPlayers: []
-  }
+  randomName = () ->
+    (String.fromCharCode(65 + Math.random() * 26) for x in [0..8]).join("")
 
   socket = io.connect()
-  socket.emit('join', randomName)
+  lobby = new Lobby(socket, randomName())
+  lobby.join()
 
-  # called whenever the lobby gets updated
-  socket.on('currentlobby', (currentPlayers) ->
-    lobby.currentPlayers = currentPlayers
-    $("#players").empty()
-    _.each(currentPlayers, (player) ->
-      $("#players").append("<p>#{player.name}</p>")
-    )
+  # # called whenever the lobby gets updated
+  # socket.on('currentlobby', (lobbyState) ->
+  #   lobby = lobbyState
+  #   # if !!(AUTOSTART_PLAYERS?) and _.size(currentPlayers) >= AUTOSTART_PLAYERS
+  #   #   socket.emit('start')
+  # )
 
-    if !!(AUTOSTART_PLAYERS?) and _.size(currentPlayers) >= AUTOSTART_PLAYERS
-      socket.emit('start')
-  )
-  socket.on('gamestart', () ->
+  socket.on('gamestart', (gameProperties) ->
     if !framework.isRunning()
-      yourName = randomName
-      framework.setup(socket, _.map(lobby.currentPlayers, (p) -> p.name), yourName)
+      # hack on players to the game properties
+      gameProperties.playerNames = (p.name for idx, p of lobby.players)
+      gameProperties.yourName = lobby.yourName
+      framework.setup(socket, gameProperties)
       $("#lobby").hide()
     else
       console.log("got multiple gamestarts!")

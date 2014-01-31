@@ -15,33 +15,49 @@ io.set('log level', 2);
 
 server.listen(PORT);
 
-// pid : name
-currentPlayers = {};
+lobby = {
+    // pid : name
+    players : {},
+    // the pid of the host of the game (first one who joins)
+    host : undefined,
+    properties : {
+        scoreLimit: 2,
+    }
+}
+
 globalCounter = 0;
 
 io.sockets.on('connection', function (socket) {
     var uniqId = globalCounter++;
     var player = {};
-    currentPlayers[uniqId] = player;
+    if(lobby.players.length === 0) {
+        lobby.host = uniqId;
+    }
+    lobby.players[uniqId] = player;
 
     // this is expected to be called exactly once when the socket joins
     socket.on('join', function (name) {
         console.log(name, "joined");
         player.name = name;
-        io.sockets.emit('currentlobby', currentPlayers);
+        io.sockets.emit('currentlobby', lobby);
     });
 
-    socket.on('start', function() {
-        io.sockets.emit('gamestart');
+    socket.on('updateProperties', function (properties) {
+        lobby.properties = properties;
+        io.sockets.emit('currentlobby', lobby)
+    })
+
+    socket.on('gamestart', function(gameProperties) {
+        io.sockets.emit('gamestart', gameProperties);
     });
 
     socket.on('disconnect', function() {
         console.log("got disconnect for player", player.name, "with uniqId", uniqId);
-        console.log("players are currently", currentPlayers);
-        delete currentPlayers[uniqId];
-        io.sockets.emit('currentlobby', currentPlayers);
+        console.log("players are currently", lobby.players);
+        delete lobby.players[uniqId];
+        io.sockets.emit('currentlobby', lobby);
         io.sockets.emit('playerDisconnected', player.name);
-        console.log("players are now", currentPlayers);
+        console.log("players are now", lobby.players);
     });
 
     socket.on('inputPacket', function(inputSerialized, frameStamp) {
