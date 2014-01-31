@@ -1,16 +1,22 @@
+if ( process.env.NODE_ENV === undefined ) {
+    throw new Error("No NODE_ENV found in environment!");
+}
+
 var express = require('express')
   , app = express()
   , server = require('http').createServer(app)
   , io = require('socket.io').listen(server)
   , _ = require('underscore')
+  , path = require('path')
 
-PORT = 3000;
+var environment = require(path.join(__dirname, 'environments', process.env.NODE_ENV));
+
+PORT = environment.port || 80;
 
 app.configure(function() {
-    app.use(express.static(__dirname + '/public'));
-    app.use(express.static(__dirname + '/compiled'));
+    app.use(express.static(path.join(__dirname, 'public')));
+    app.use(express.static(path.join(__dirname, 'compiled')));
 });
-
 
 app.get(/^\/(\d+)/, function (req, res) {
     res.sendfile("room.html")
@@ -24,7 +30,7 @@ app.get("/lobby_list.json", function (req, res) {
     res.json({lobbies: lobbies})
 });
 
-io.set('log level', 3);
+io.set('log level', environment.socket_io_log_level || 2);
 
 server.listen(PORT);
 

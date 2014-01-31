@@ -25,6 +25,13 @@ module.exports = function(grunt) {
                 dest: '',
             },
         },
+
+        env: {
+            dev : {
+                NODE_ENV: 'development',
+            },
+        },
+
         watch: {
             coffee_changed: {
                 files: 'coffee/**/*.coffee',
@@ -60,12 +67,14 @@ module.exports = function(grunt) {
                 },
             },
         },
+
     });
 
     grunt.loadNpmTasks('grunt-contrib-clean');
     grunt.loadNpmTasks('grunt-contrib-coffee');
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-concurrent');
+    grunt.loadNpmTasks('grunt-env');
     grunt.loadNpmTasks('grunt-nodemon');
 
     grunt.event.on('watch', function(action, filepathString) {
@@ -88,5 +97,5 @@ module.exports = function(grunt) {
         }
     });
 
-    grunt.registerTask('default', ['clean:compiled', 'coffee:all', 'concurrent:dev']);
+    grunt.registerTask('default', ['env:dev', 'clean:compiled', 'coffee:all', 'concurrent:dev']);
 }
