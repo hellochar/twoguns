@@ -44,8 +44,8 @@ define [
       if @inputs.pressed('w') and @body.canJump()
         @body.ApplyImpulse(IMPULSE_JUMP, loc)
 
-      if @inputs.pressed('w')
-        @body.ApplyForce(FORCE_FLY, loc)
+      # if @inputs.pressed('w')
+      #   @body.ApplyForce(FORCE_FLY, loc)
 
       vel = @body.GetLinearVelocity()
 

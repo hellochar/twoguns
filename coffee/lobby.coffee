@@ -36,15 +36,26 @@ define [
         @socket.emit('gamestart', @properties)
       )
       @el.propertiesDiv = $("<div/>").appendTo("#lobby")
-      @el.scoreLimit = $("<input type='number'>").attr(
-        min: 1
-        max: 1000
-      ).appendTo(@el).change("input", (evt) ->
-        self.properties.scoreLimit = parseInt($(@).val(), 10)
-        self.sendUpdate()
-      )
 
-      @el.hostControlNames = ["startButton", "scoreLimit"]
+      createNumericControl = (name, displayName, min, max) =>
+        @el.append(displayName)
+        @el[name] = $("<input>").attr(
+          type: "number"
+          min: min
+          max: max
+        ).appendTo(@el).change("input", (evt) ->
+          self.properties[name] = parseInt($(@).val(), 10)
+          self.sendUpdate()
+        )
+
+      createNumericControl("scoreLimit", "Score Limit", 1, 1000)
+
+      createNumericControl("mapWidth", "Map Width", 10, 100)
+      createNumericControl("mapHeight", "Map Height", 10, 100)
+
+      createNumericControl("randomSeed", "Seed Number", -Infinity, Infinity)
+
+      @el.hostControlNames = ["startButton", "scoreLimit", "mapWidth", "mapHeight", "randomSeed"]
 
     sendUpdate: () =>
       @socket.emit('updateProperties', @properties)
@@ -61,6 +72,8 @@ define [
     updateHTML: () =>
       # update properties elements
       @el.scoreLimit.val(@properties.scoreLimit)
+      for name in @el.hostControlNames
+        @el[name].val(@properties[name]) if @properties[name]
 
       @el.players.empty()
       for idx, player of @players

@@ -22,6 +22,9 @@ lobby = {
     host : undefined,
     properties : {
         scoreLimit: 2,
+        mapWidth: 20,
+        mapHeight: 10,
+        randomSeed: 0,
     }
 }
 

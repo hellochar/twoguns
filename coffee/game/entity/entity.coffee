@@ -37,6 +37,7 @@ define [
 
     # destroy this Entity's body; pass an optional (who) parameter to designate who destroyed it
     destroy: (who) =>
+      return unless @body
       @game.world.DestroyBody(@body)
       $(this).trigger("gotDestroyed", who)
       $(who).trigger("destroyed", this) if who

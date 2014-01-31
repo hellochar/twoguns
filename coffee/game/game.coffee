@@ -9,9 +9,8 @@ define [
   'mixin/registerable'
   'game/entity/entity'
   'game/entity/player'
-  'game/random',
   'game/world/game_world'
-], ($, _, b2, Stats, Utils, Overlay, MultiContactListener, Registerable, Entity, Player, Random, GameWorld) ->
+], ($, _, b2, Stats, Utils, Overlay, MultiContactListener, Registerable, Entity, Player, GameWorld) ->
   # model of the game
   #
   #   there is a physics world, with objects etc.
@@ -21,7 +20,7 @@ define [
 
   class Game
     Utils.make(this, Registerable("prestep", "poststep", "onstep"))
-    constructor: (@width, @height, playerNames, yourName, @random = new Random()) ->
+    constructor: (@width, @height, playerNames, yourName, @random) ->
       @entities = []
       @world = new GameWorld(new b2.Vec2(0, 8), true, this)
       @world.createMap()
@@ -47,7 +46,7 @@ define [
     step: () =>
       $(@).trigger("prestep")
 
-      @world.Step(1/30, 10, 10)
+      @world.Step(1/30, 8, 3)
       @world.ClearForces()
       $(@).trigger("onstep")
 

@@ -5,9 +5,10 @@ define [
   'overlay'
   'game/game'
   'game/inputs'
+  'game/random'
   'game/input_network_collector'
   'game/render/renderer'
-], (_, b2, cq, Overlay, Game, Inputs, InputNetworkCollector, Renderer) ->
+], (_, b2, cq, Overlay, Game, Inputs, Random, InputNetworkCollector, Renderer) ->
 
   # induces feedback latency equal to FRAME_OFFSET * (ms per frame)
   FRAME_OFFSET = 1
@@ -26,7 +27,7 @@ define [
         {x: @cq.canvas.width/2, y: @cq.canvas.height/2},
         {}
       )
-      @game = new Game(10, 10, gameProperties.playerNames, gameProperties.yourName)
+      @game = new Game(gameProperties.mapWidth, gameProperties.mapHeight, gameProperties.playerNames, gameProperties.yourName, new Random(gameProperties.randomSeed))
       window.you = @game.youPlayer
       @renderer = new Renderer(18, @game, @cq)
       @networkCollector = new InputNetworkCollector(@game.players)
