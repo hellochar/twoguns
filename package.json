@@ -9,6 +9,9 @@
     "url": "git://github.com/hellochar/twoguns.git"
   },
   "author": "Xiaohan Zhang <hellocharlien@hotmail.com>",
+  "engines": {
+      "node": "0.10.x"
+  }
   "devDependencies": {
     "grunt": "~0.4.2",
     "grunt-contrib-clean": "~0.5.0",

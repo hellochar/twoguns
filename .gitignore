@@ -5,3 +5,4 @@ compiled/
 libpeerconnection.log
 _tmp_markdown.html
 node_modules/
+.env
