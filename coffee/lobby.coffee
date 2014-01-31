@@ -23,7 +23,7 @@ define [
       })
 
     join: () =>
-      @socket.emit('join', @yourName)
+      @socket.emit('join', window.location.pathname, @yourName)
       @socket.on('currentlobby', (state) =>
         @update(state)
       )

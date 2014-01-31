@@ -32,6 +32,8 @@ define [
         Overlay.show("You got killed by #{bullet.player.name}!")
       )
 
+      @finished = false
+
     createBlock: (x, y, isStatic = true) =>
       @world.createBlock(x, y, isStatic)
 

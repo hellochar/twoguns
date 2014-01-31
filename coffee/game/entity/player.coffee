@@ -23,7 +23,7 @@ define [
       $(this).on("gotDestroyed", (who) =>
         setTimeout(() =>
           @constructBody()
-          Overlay.hide()
+          Overlay.hide() unless @game.finished
         , 3000)
       )
 

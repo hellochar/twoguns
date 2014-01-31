@@ -74,7 +74,7 @@ define [
       @renderer.viewportWidth *= 1.05 if @input.pressed('dash')
       @renderer.viewportWidth /= 1.05 if @input.pressed('equal')
 
-      if @networkCollector.isReady()
+      if @networkCollector.isReady() and not @game.finished
         @statsStep.begin()
 
         playerInputs = @input.toWorld(@renderer)
@@ -95,6 +95,8 @@ define [
     checkWinCondition: () ->
       winningPlayer = _.findWhere(@game.players, {score: @gameProperties.scoreLimit})
       return if not winningPlayer
+
+      @game.finished = true
       if winningPlayer is @game.youPlayer
         Overlay.show("You win!!!")
       else
