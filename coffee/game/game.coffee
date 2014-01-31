@@ -32,11 +32,6 @@ define [
         Overlay.show("You got killed by #{bullet.player.name}!")
       )
 
-      # callbacks to be invoked right before the game steps
-      # Use this to e.g. add and remove blocks that you can't do during
-      # a callback function for collisions
-      @delegates = []
-
     # examples:
     #   g = new Game()
     #   g.create(Player, "hellochar")
@@ -132,9 +127,6 @@ define [
 
     # delta = number of ms since the last call to step
     step: () =>
-      method() for method in @delegates
-      @delegates = []
-
       $(@).trigger("prestep")
 
       @world.Step(1/30, 10, 10)

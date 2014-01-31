@@ -5,7 +5,7 @@ define [
   'overlay'
   'game/entity/entity'
   'game/entity/bullet'
-  'game/entity/player_body'
+  'game/world/player_body'
   'game/entity/block'
 ], (jquery, b2, Utils, Overlay, Entity, Bullet, PlayerBody, Block) ->
 
@@ -26,6 +26,9 @@ define [
           Overlay.hide()
         , 3000)
       )
+
+    incrementScore: () =>
+      @score += 1
 
     makeBody: () => PlayerBody.create(@)
 

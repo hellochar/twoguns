@@ -16,20 +16,20 @@ define [
       # this gets called in the middle of world.Step()
       $(@body).on("begincontact", (evt, contact, myFixture, otherFixture) =>
         if contact.IsTouching()
-          @game.delegates.push( =>
+          $(@game).one("poststep", =>
             @destroy(this)
           )
           $(@body).off("begincontact")
 
           if @bulletType is "destroy"
             otherEntity = otherFixture.GetBody().GetUserData()
-            @game.delegates.push( => otherEntity.destroy(this))
+            $(@game).one("poststep", => otherEntity.destroy(this))
           else if @bulletType is "create"
             # blockCenter = @body.GetWorldCenter()
             wm = new b2.WorldManifold()
             contact.GetWorldManifold(wm)
             blockCenter = wm.m_points[0].Copy()
-            @game.delegates.push(=>
+            $(@game).one("poststep", =>
               direction = wm.m_normal.Copy()
               direction.Multiply(0.5 - BULLET_RADIUS / 2)
               blockCenter.Add(direction)
@@ -42,7 +42,7 @@ define [
       $(this).on("destroyed", (evt, what) =>
         # use class type of @player instead of explicitly specifying Player to remove circular dependency
         return unless what instanceof @player.constructor
-        @player.score += 1
+        @player.incrementScore()
       )
 
     makeBody: () =>
