@@ -8,7 +8,7 @@ require [
 
   window.framework = framework
 
-  # AUTOSTART_PLAYERS = 2
+  AUTOSTART_PLAYERS = 1
 
 
   randomName = (String.fromCharCode(65 + Math.random() * 26) for x in [0..8]).join("")

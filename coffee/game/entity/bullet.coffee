@@ -25,11 +25,13 @@ define [
             otherEntity = otherFixture.GetBody().GetUserData()
             @game.delegates.push( => otherEntity.destroy(this))
           else if @bulletType is "create"
-            blockCenter = @body.GetWorldCenter()
+            # blockCenter = @body.GetWorldCenter()
+            wm = new b2.WorldManifold()
+            contact.GetWorldManifold(wm)
+            blockCenter = wm.m_points[0].Copy()
             @game.delegates.push(=>
-              direction = contact.GetManifold().m_localPoint
-              length = direction.Normalize()
-              direction.Multiply(length - BULLET_RADIUS)
+              direction = wm.m_normal.Copy()
+              direction.Multiply(0.5 - BULLET_RADIUS / 2)
               blockCenter.Add(direction)
               @game.createBlock(blockCenter.x, blockCenter.y)
             )
