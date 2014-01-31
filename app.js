@@ -30,11 +30,17 @@ app.get("/lobby_list.json", function (req, res) {
     res.json({lobbies: lobbies})
 });
 
+app.get("/new", function (req, res) {
+    var firstFreeRoom = 0;
+    for( firstFreeRoom = 0; lobbies[firstFreeRoom] !== undefined; firstFreeRoom += 1) {}
+    res.redirect("/" + firstFreeRoom)
+});
+
 io.set('log level', environment.socket_io_log_level || 2);
 
 server.listen(PORT);
 
-lobbies = {}
+lobbies = {};
 
 function newLobby() {
     return {
@@ -61,6 +67,7 @@ globalCounter = 0;
 
 io.sockets.on('connection', function (socket) {
     // this is expected to be called exactly once when the socket joins
+    // room is an integer
     socket.on('join', function (room, name) {
         var lobby = getLobby(room);
 
@@ -95,6 +102,11 @@ io.sockets.on('connection', function (socket) {
             io.sockets.in(room).emit('currentlobby', lobby);
             io.sockets.in(room).emit('playerDisconnected', player.name);
             console.log("players are now", lobby.players);
+
+            // delete the room if it's empty
+            if(_.size(lobby.players) === 0) {
+                delete lobbies[room];
+            }
         });
 
         socket.on('inputPacket', function(inputSerialized, frameStamp) {

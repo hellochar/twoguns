@@ -24,7 +24,7 @@
 
       Lobby.prototype.join = function() {
         var _this = this;
-        this.socket.emit('join', window.location.pathname, this.yourName);
+        this.socket.emit('join', parseInt(window.location.pathname.replace("/", ""), 10), this.yourName);
         return this.socket.on('currentlobby', function(state) {
           return _this.update(state);
         });

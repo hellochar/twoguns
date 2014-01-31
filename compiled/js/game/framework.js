@@ -93,10 +93,11 @@
         }
         this.game.finished = true;
         if (winningPlayer === this.game.youPlayer) {
-          return Overlay.show("You win!!!");
+          Overlay.show("You win!!!");
         } else {
-          return Overlay.show("" + winningPlayer.name + " won!");
+          Overlay.show("" + winningPlayer.name + " won!");
         }
+        return this.socket.disconnect();
       },
       onRender: function(delta, time) {
         this.statsRender.begin();

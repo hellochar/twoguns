@@ -101,6 +101,7 @@ define [
         Overlay.show("You win!!!")
       else
         Overlay.show("#{winningPlayer.name} won!")
+      @socket.disconnect()
 
 
     # rendering loop

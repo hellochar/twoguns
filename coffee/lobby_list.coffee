@@ -5,6 +5,7 @@ require [
   $("<script src='http://" + window.location.hostname + ":35729/livereload.js'></scr" + "ipt>").appendTo("head")
   gamelistTemplate = _.template("
     <h2> <%= _.size(lobbies) %> Currently Open Lobbies</h2>
+    <h3><a href='/new'>Create new game</a></h3>
     <% _.each(lobbies, function(lobby, lobbyId) { %>
       <div class='lobby'>
         <a href=\" <%= lobbyId %> \"> <%= lobbyId %> </a>
