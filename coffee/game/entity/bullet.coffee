@@ -4,7 +4,7 @@ define [
   'game/entity/entity'
 ], ($, b2, Entity) ->
 
-  BULLET_SPEED = 50
+  BULLET_SPEED = 8
   BULLET_RADIUS = 0.05
   class Bullet extends Entity
     constructor: (@player, @pos, @dir, @bulletType) ->
