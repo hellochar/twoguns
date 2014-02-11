@@ -10,7 +10,8 @@ var require = {
         stats: ['vendor/stats'],
         seedrandom: ['vendor/seedrandom'],
         underscore: ['vendor/underscore'],
-        maybe: 'vendor/maybe',
+        "dat.gui": 'vendor/dat.gui',
+
     },
     shim: {
         box2d: {
@@ -30,6 +31,12 @@ var require = {
         },
         canvasquery: {
             exports: 'cq'
+        },
+        "dat.gui": {
+            exports: 'dat'
+        },
+        settings: {
+            exports: 'settings'
         },
     }
 };

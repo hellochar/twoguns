@@ -3,7 +3,7 @@
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-  define(['jquery', 'b2', 'utils', 'overlay', 'game/entity/entity', 'game/entity/bullet', 'game/world/player_body', 'game/entity/block'], function(jquery, b2, Utils, Overlay, Entity, Bullet, PlayerBody, Block) {
+  define(['jquery', 'b2', 'utils', 'overlay', 'settings', 'game/entity/entity', 'game/entity/bullet', 'game/world/player_body', 'game/entity/block'], function(jquery, b2, Utils, Overlay, settings, Entity, Bullet, PlayerBody, Block) {
     var Player;
     Player = (function(_super) {
       __extends(Player, _super);
@@ -51,15 +51,13 @@
       };
 
       Player.prototype.prestep = function() {
-        var FORCE_FLY, FORCE_WALK_X, IMPULSE_DOWN, IMPULSE_JUMP, loc, vel;
+        var FORCE_WALK_X, IMPULSE_JUMP, loc, vel;
         this.mouse = this.inputs.mouse;
         if (!this.body) {
           return;
         }
-        IMPULSE_JUMP = new b2.Vec2(0, -0.04 / this.body.GetMass());
-        IMPULSE_DOWN = new b2.Vec2(0, -0.04 / this.body.GetMass());
-        FORCE_WALK_X = 4.0;
-        FORCE_FLY = new b2.Vec2(0, -0.8);
+        IMPULSE_JUMP = new b2.Vec2(0, settings.player.jumpImpulse);
+        FORCE_WALK_X = settings.player.walkForce;
         loc = this.body.GetWorldCenter().Copy();
         if (this.inputs.pressed('w') && this.body.canJump()) {
           this.body.ApplyImpulse(IMPULSE_JUMP, loc);
@@ -71,9 +69,6 @@
           this.body.SetLinearVelocity(new b2.Vec2(FORCE_WALK_X, vel.y));
         } else {
           this.body.SetLinearVelocity(new b2.Vec2(0, vel.y));
-        }
-        if (this.inputs.pressed('s')) {
-          this.body.ApplyImpulse(IMPULSE_JUMP.Copy().Multiply(1 / 10), loc);
         }
         if (this.mouse.down) {
           return this.shoot({

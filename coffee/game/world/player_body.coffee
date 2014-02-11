@@ -2,8 +2,9 @@ define [
   'jquery',
   'underscore',
   'b2',
+  'settings'
   'game/entity/bullet'
-], ($, _, b2, Bullet) ->
+], ($, _, b2, settings, Bullet) ->
 
   BODYDEF = new b2.BodyDef
   BODYDEF.type = b2.Body.b2_dynamicBody
@@ -17,7 +18,7 @@ define [
   FIXDEF.shape = new b2.PolygonShape
 
   PlayerBody = {
-    create: (player, height = 0.6, width = 0.2) =>
+    create: (player, height = settings.player.height, width = settings.player.width) =>
       game = player.game
       # find a nice spot
       pos = game.findEmptyAABB(1, .5)
@@ -72,7 +73,7 @@ define [
     calculateVisionPoly: () ->
       poly = []
       @collidedBodies = []
-      for angle in [0..Math.PI*2] by (Math.PI*2) / 100
+      for angle in [0..Math.PI*2] by (Math.PI*2) / settings.player.visionPolyDetail
         dir = new b2.Vec2(Math.cos(angle), Math.sin(angle))
         isect = @game.rayIntersect(@GetWorldCenter(), dir,
           (fixture) => fixture.GetBody() isnt this and not (fixture.GetBody().GetUserData() instanceof Bullet),

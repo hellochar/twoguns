@@ -1,5 +1,5 @@
 (function() {
-  define(['jquery', 'underscore', 'b2', 'game/entity/bullet'], function($, _, b2, Bullet) {
+  define(['jquery', 'underscore', 'b2', 'settings', 'game/entity/bullet'], function($, _, b2, settings, Bullet) {
     var BODYDEF, FIXDEF, PlayerBody, pbMethods,
       _this = this;
     BODYDEF = new b2.BodyDef;
@@ -15,10 +15,10 @@
       create: function(player, height, width) {
         var body, game, pos;
         if (height == null) {
-          height = 0.6;
+          height = settings.player.height;
         }
         if (width == null) {
-          width = 0.2;
+          width = settings.player.width;
         }
         game = player.game;
         pos = game.findEmptyAABB(1, .5);
@@ -68,7 +68,7 @@
           _this = this;
         poly = [];
         this.collidedBodies = [];
-        for (angle = _i = 0, _ref = Math.PI * 2, _ref1 = (Math.PI * 2) / 100; _ref1 > 0 ? _i <= _ref : _i >= _ref; angle = _i += _ref1) {
+        for (angle = _i = 0, _ref = Math.PI * 2, _ref1 = (Math.PI * 2) / settings.player.visionPolyDetail; _ref1 > 0 ? _i <= _ref : _i >= _ref; angle = _i += _ref1) {
           dir = new b2.Vec2(Math.cos(angle), Math.sin(angle));
           isect = this.game.rayIntersect(this.GetWorldCenter(), dir, function(fixture) {
             return fixture.GetBody() !== _this && !(fixture.GetBody().GetUserData() instanceof Bullet);

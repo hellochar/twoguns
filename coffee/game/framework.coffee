@@ -3,15 +3,16 @@ define [
   'b2'
   'canvasquery'
   'overlay'
+  'settings'
   'game/game'
   'game/inputs'
   'game/random'
   'game/input_network_collector'
   'game/render/renderer'
-], (_, b2, cq, Overlay, Game, Inputs, Random, InputNetworkCollector, Renderer) ->
+], (_, b2, cq, Overlay, settings, Game, Inputs, Random, InputNetworkCollector, Renderer) ->
 
   # induces feedback latency equal to FRAME_OFFSET * (ms per frame)
-  FRAME_OFFSET = 1
+  FRAME_OFFSET = settings.frameOffset
 
   framework = {
     isRunning: () -> !!@hasSetup

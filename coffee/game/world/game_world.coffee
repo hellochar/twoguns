@@ -7,16 +7,6 @@ define [
 ], ($, b2, MultiContactListener, Wall, Block) ->
 
 
-  BLOCK_BODYDEF = new b2.BodyDef
-  BLOCK_BODYDEF.type = b2.Body.b2_staticBody
-
-  BLOCK_FIXDEF = new b2.FixtureDef
-  BLOCK_FIXDEF.density = 1
-  BLOCK_FIXDEF.friction = 1
-  BLOCK_FIXDEF.restitution = 0
-  BLOCK_FIXDEF.shape = new b2.PolygonShape
-
-
   class GameWorld extends b2.World
     constructor: (gravity, allowSleep, @game) ->
       super(gravity, allowSleep)
@@ -34,7 +24,6 @@ define [
     #   exactly 2 produces quite thin lines, somewhat sparse
     #   after 2 the usual noisey-ness comes into play
     generateNoiseBoxes: (noiseScalar, gridSize) =>
-      BLOCK_FIXDEF.shape.SetAsBox(gridSize / 2, gridSize / 2)
       for x in [-@game.width/2...@game.width/2] by gridSize
         for y in [-@game.height/2...@game.height/2] by gridSize
 
@@ -42,8 +31,8 @@ define [
             @createBlock(x + gridSize / 2, y + gridSize / 2)
             # todo: query neighbors, create contacts? e.g. make blocks free-falling?
 
-    createBlock: (x, y, isStatic = true) =>
-      new Block(@game, new b2.Vec2(x, y), 1, isStatic)
+    createBlock: (x, y) =>
+      new Block(@game, new b2.Vec2(x, y))
 
     createBoundingBoxes: (width, height) =>
       # create top/bottom

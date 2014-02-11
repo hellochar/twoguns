@@ -1,9 +1,12 @@
 define [
   'b2'
+  'settings'
   'game/entity/entity'
-], (b2, Entity) ->
+], (b2, settings, Entity) ->
   class Block extends Entity
-    constructor: (@game, @center, @size, @static) ->
+    @SIZE = settings.block.size
+    @isStatic = settings.block.isStatic
+    constructor: (@game, @center, @size = @constructor.SIZE, @static = @constructor.isStatic) ->
       super(@game)
 
     makeBody: () =>
@@ -13,7 +16,7 @@ define [
 
       fixDef = new b2.FixtureDef
       fixDef.density = 1
-      fixDef.friction = 1
+      fixDef.friction = settings.block.friction
       fixDef.restitution = 0
       fixDef.shape = new b2.PolygonShape
       fixDef.shape.SetAsBox(@size/2, @size/2)

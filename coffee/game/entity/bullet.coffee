@@ -1,12 +1,14 @@
 define [
   'jquery'
   'b2'
+  'settings'
+  'game/entity/block'
   'game/entity/entity'
-], ($, b2, Entity) ->
+], ($, b2, settings, Block, Entity) ->
 
-  BULLET_SPEED = 8
-  BULLET_RADIUS = 0.05
   class Bullet extends Entity
+    @BULLET_SPEED = settings.bullet.speed
+    @BULLET_RADIUS = settings.bullet.radius
     constructor: (@player, @pos, @dir, @bulletType) ->
       super(@player.game)
 
@@ -31,7 +33,7 @@ define [
             blockCenter = wm.m_points[0].Copy()
             $(@game).one("poststep", =>
               direction = wm.m_normal.Copy()
-              direction.Multiply(0.5 - BULLET_RADIUS / 2)
+              direction.Multiply(Block.SIZE / 2 - @constructor.BULLET_RADIUS / 2)
               blockCenter.Add(direction)
               @game.createBlock(blockCenter.x, blockCenter.y)
             )
@@ -52,7 +54,7 @@ define [
       bodyDef.position.SetV(@pos)
 
       bodyDef.linearVelocity.SetV(@dir)
-      bodyDef.linearVelocity.Multiply(BULLET_SPEED)
+      bodyDef.linearVelocity.Multiply(@constructor.BULLET_SPEED)
 
       body = @game.world.CreateBody(bodyDef)
 
@@ -60,7 +62,7 @@ define [
       fixDef.density = 0.0
       fixDef.friction = 0.0
       fixDef.restitution = 0
-      fixDef.shape = new b2.CircleShape(BULLET_RADIUS)
+      fixDef.shape = new b2.CircleShape(@constructor.BULLET_RADIUS)
 
       body.CreateFixture(fixDef)
       body

@@ -3,12 +3,14 @@
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-  define(['jquery', 'b2', 'game/entity/entity'], function($, b2, Entity) {
-    var BULLET_RADIUS, BULLET_SPEED, Bullet;
-    BULLET_SPEED = 8;
-    BULLET_RADIUS = 0.05;
+  define(['jquery', 'b2', 'settings', 'game/entity/block', 'game/entity/entity'], function($, b2, settings, Block, Entity) {
+    var Bullet;
     Bullet = (function(_super) {
       __extends(Bullet, _super);
+
+      Bullet.BULLET_SPEED = settings.bullet.speed;
+
+      Bullet.BULLET_RADIUS = settings.bullet.radius;
 
       function Bullet(player, pos, dir, bulletType) {
         var _this = this;
@@ -45,7 +47,7 @@
               return $(_this.game).one("poststep", function() {
                 var direction;
                 direction = wm.m_normal.Copy();
-                direction.Multiply(0.5 - BULLET_RADIUS / 2);
+                direction.Multiply(Block.SIZE / 2 - _this.constructor.BULLET_RADIUS / 2);
                 blockCenter.Add(direction);
                 return _this.game.createBlock(blockCenter.x, blockCenter.y);
               });
@@ -68,13 +70,13 @@
         bodyDef.bullet = true;
         bodyDef.position.SetV(this.pos);
         bodyDef.linearVelocity.SetV(this.dir);
-        bodyDef.linearVelocity.Multiply(BULLET_SPEED);
+        bodyDef.linearVelocity.Multiply(this.constructor.BULLET_SPEED);
         body = this.game.world.CreateBody(bodyDef);
         fixDef = new b2.FixtureDef();
         fixDef.density = 0.0;
         fixDef.friction = 0.0;
         fixDef.restitution = 0;
-        fixDef.shape = new b2.CircleShape(BULLET_RADIUS);
+        fixDef.shape = new b2.CircleShape(this.constructor.BULLET_RADIUS);
         body.CreateFixture(fixDef);
         return body;
       };

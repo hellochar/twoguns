@@ -3,11 +3,12 @@ define [
   'b2'
   'utils'
   'overlay'
+  'settings'
   'game/entity/entity'
   'game/entity/bullet'
   'game/world/player_body'
   'game/entity/block'
-], (jquery, b2, Utils, Overlay, Entity, Bullet, PlayerBody, Block) ->
+], (jquery, b2, Utils, Overlay, settings, Entity, Bullet, PlayerBody, Block) ->
 
   class Player extends Entity
     constructor: (@name, @game, @index) ->
@@ -35,17 +36,12 @@ define [
     prestep: () =>
       @mouse = @inputs.mouse
       return unless @body
-      IMPULSE_JUMP = new b2.Vec2(0, -0.04 / @body.GetMass())
-      IMPULSE_DOWN = new b2.Vec2(0, -0.04 / @body.GetMass())
-      FORCE_WALK_X = 4.0
-      FORCE_FLY = new b2.Vec2(0, -0.8)
+      IMPULSE_JUMP = new b2.Vec2(0, settings.player.jumpImpulse)
+      FORCE_WALK_X = settings.player.walkForce
       loc = @body.GetWorldCenter().Copy()
 
       if @inputs.pressed('w') and @body.canJump()
         @body.ApplyImpulse(IMPULSE_JUMP, loc)
-
-      # if @inputs.pressed('w')
-      #   @body.ApplyForce(FORCE_FLY, loc)
 
       vel = @body.GetLinearVelocity()
 
@@ -56,8 +52,8 @@ define [
       else
         @body.SetLinearVelocity(new b2.Vec2(0, vel.y))
 
-      if @inputs.pressed('s')
-        @body.ApplyImpulse(IMPULSE_JUMP.Copy().Multiply(1/10), loc)
+      # if @inputs.pressed('s')
+      #   @body.ApplyImpulse(IMPULSE_JUMP.Copy().Multiply(1/10), loc)
 
       if @mouse.down
         @shoot({0: "destroy", 2: "create"}[@mouse.button])

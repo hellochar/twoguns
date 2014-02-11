@@ -4,14 +4,7 @@
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
   define(['jquery', 'b2', 'multi_contact_listener', 'game/entity/wall', 'game/entity/block'], function($, b2, MultiContactListener, Wall, Block) {
-    var BLOCK_BODYDEF, BLOCK_FIXDEF, GameWorld;
-    BLOCK_BODYDEF = new b2.BodyDef;
-    BLOCK_BODYDEF.type = b2.Body.b2_staticBody;
-    BLOCK_FIXDEF = new b2.FixtureDef;
-    BLOCK_FIXDEF.density = 1;
-    BLOCK_FIXDEF.friction = 1;
-    BLOCK_FIXDEF.restitution = 0;
-    BLOCK_FIXDEF.shape = new b2.PolygonShape;
+    var GameWorld;
     GameWorld = (function(_super) {
       __extends(GameWorld, _super);
 
@@ -33,7 +26,6 @@
 
       GameWorld.prototype.generateNoiseBoxes = function(noiseScalar, gridSize) {
         var x, y, _i, _ref, _ref1, _results;
-        BLOCK_FIXDEF.shape.SetAsBox(gridSize / 2, gridSize / 2);
         _results = [];
         for (x = _i = _ref = -this.game.width / 2, _ref1 = this.game.width / 2; gridSize > 0 ? _i < _ref1 : _i > _ref1; x = _i += gridSize) {
           _results.push((function() {
@@ -52,11 +44,8 @@
         return _results;
       };
 
-      GameWorld.prototype.createBlock = function(x, y, isStatic) {
-        if (isStatic == null) {
-          isStatic = true;
-        }
-        return new Block(this.game, new b2.Vec2(x, y), 1, isStatic);
+      GameWorld.prototype.createBlock = function(x, y) {
+        return new Block(this.game, new b2.Vec2(x, y));
       };
 
       GameWorld.prototype.createBoundingBoxes = function(width, height) {

@@ -1,7 +1,7 @@
 (function() {
-  define(['underscore', 'b2', 'canvasquery', 'overlay', 'game/game', 'game/inputs', 'game/random', 'game/input_network_collector', 'game/render/renderer'], function(_, b2, cq, Overlay, Game, Inputs, Random, InputNetworkCollector, Renderer) {
+  define(['underscore', 'b2', 'canvasquery', 'overlay', 'settings', 'game/game', 'game/inputs', 'game/random', 'game/input_network_collector', 'game/render/renderer'], function(_, b2, cq, Overlay, settings, Game, Inputs, Random, InputNetworkCollector, Renderer) {
     var FRAME_OFFSET, framework;
-    FRAME_OFFSET = 1;
+    FRAME_OFFSET = settings.frameOffset;
     framework = {
       isRunning: function() {
         return !!this.hasSetup;

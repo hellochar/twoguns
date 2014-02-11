@@ -15,19 +15,30 @@ PORT = environment.port || 80;
 
 app.configure(function() {
     app.use(express.static(path.join(__dirname, 'public')));
+    app.use(express.bodyParser());
     app.use(express.static(path.join(__dirname, 'compiled')));
 });
 
 app.get(/^\/(\d+)/, function (req, res) {
-    res.sendfile("room.html")
-});
-
-app.get('/', function (req, res) {
-    res.send("type in a room id")
+    res.sendfile("room.html");
 });
 
 app.get("/lobby_list.json", function (req, res) {
-    res.json({lobbies: lobbies})
+    res.json({lobbies: lobbies});
+});
+
+app.get("/js/settings.js", function (req, res) {
+    res.send("var settings = " + JSON.stringify(settings));
+});
+
+module.exports = {};
+
+app.post("/settings.json", function (req, res) {
+    console.log(req);
+    settings = req.body;
+    res.send(settings);
+    console.log("Got settings ", settings);
+    module.exports.req = req;
 });
 
 app.get("/new", function (req, res) {
@@ -41,6 +52,29 @@ io.set('log level', environment.socket_io_log_level || 2);
 server.listen(PORT);
 
 lobbies = {};
+
+settings = {
+    block : {
+                friction : 1,
+                size : 1,
+                isStatic : true,
+            },
+
+    bullet : {
+                 speed : 8,
+                 radius : 0.05,
+             },
+
+    player : {
+                 walkForce : 4,
+                 jumpImpulse : -0.33281,
+                 width : 0.2,
+                 height : 0.6,
+                 visionPolyDetail : 100,
+             },
+
+    frameOffset : 1,
+};
 
 function newLobby() {
     return {

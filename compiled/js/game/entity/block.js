@@ -3,16 +3,20 @@
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-  define(['b2', 'game/entity/entity'], function(b2, Entity) {
+  define(['b2', 'settings', 'game/entity/entity'], function(b2, settings, Entity) {
     var Block;
     Block = (function(_super) {
       __extends(Block, _super);
 
+      Block.SIZE = settings.block.size;
+
+      Block.isStatic = settings.block.isStatic;
+
       function Block(game, center, size, _static) {
         this.game = game;
         this.center = center;
-        this.size = size;
-        this["static"] = _static;
+        this.size = size != null ? size : this.constructor.SIZE;
+        this["static"] = _static != null ? _static : this.constructor.isStatic;
         this.image = __bind(this.image, this);
         this.color = __bind(this.color, this);
         this.draw = __bind(this.draw, this);
@@ -28,7 +32,7 @@
         bodyDef.position.SetV(this.center);
         fixDef = new b2.FixtureDef;
         fixDef.density = 1;
-        fixDef.friction = 1;
+        fixDef.friction = settings.block.friction;
         fixDef.restitution = 0;
         fixDef.shape = new b2.PolygonShape;
         fixDef.shape.SetAsBox(this.size / 2, this.size / 2);
