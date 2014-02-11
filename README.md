@@ -1,6 +1,18 @@
 Multiplayer shooting platformer with destructible terrain
 =========================================================
 
+## How to run in dev?
+
+    1. git clone
+    2. npm install
+    2. npm install -g grunt-cli
+    2. grunt
+
+Visit [localhost:3000](localhost:3000)
+
+Any changes you make to .coffee files will be automatically compiled by grunt and your browser will auto-refresh.
+
+
 
 ## Todo
 - Two guns
