@@ -1,14 +1,12 @@
 (function() {
   define(['underscore', 'b2', 'canvasquery', 'overlay', 'settings', 'game/game', 'game/inputs', 'game/random', 'game/input_network_collector', 'game/render/renderer'], function(_, b2, cq, Overlay, settings, Game, Inputs, Random, InputNetworkCollector, Renderer) {
-    var FRAME_OFFSET, framework;
-    FRAME_OFFSET = settings.frameOffset;
+    var framework;
     framework = {
       isRunning: function() {
         return !!this.hasSetup;
       },
       setup: function(socket, gameProperties) {
-        var frame, player, _i, _j, _len, _ref,
-          _this = this;
+        var _this = this;
         if (this.isRunning()) {
           throw new Error("framework.setup() called more than once!");
         }
@@ -24,23 +22,11 @@
         this.game = new Game(gameProperties.mapWidth, gameProperties.mapHeight, gameProperties.playerNames, gameProperties.yourName, new Random(gameProperties.randomSeed));
         window.you = this.game.youPlayer;
         this.renderer = new Renderer(18, this.game, this.cq);
-        this.networkCollector = new InputNetworkCollector(this.game.players);
-        for (frame = _i = 0; 0 <= FRAME_OFFSET ? _i < FRAME_OFFSET : _i > FRAME_OFFSET; frame = 0 <= FRAME_OFFSET ? ++_i : --_i) {
-          _ref = this.game.players;
-          for (_j = 0, _len = _ref.length; _j < _len; _j++) {
-            player = _ref[_j];
-            this.networkCollector.put(player.name, (new Inputs()).toWorld(this.renderer), frame);
-          }
-        }
+        this.networkCollector = new InputNetworkCollector(this.game, this.socket, settings.frameOffset);
         (function() {
           var indicator, invocations;
           invocations = 0;
-          indicator = $("<div/>").appendTo("body").css({
-            position: "absolute",
-            left: "0px",
-            top: "100px",
-            background: "white"
-          });
+          indicator = $("<div/>").appendTo("#debughud");
           $(_this.game).on('rayintersectall', function() {
             return invocations += 1;
           });
@@ -49,21 +35,26 @@
             return invocations = 0;
           });
         })();
+        (function() {
+          var latencydiv;
+          latencydiv = $("<div>").appendTo("#debughud");
+          return $(_this.game).on('poststep', function() {
+            return latencydiv.text("" + (Math.floor(_this.networkCollector.getLatency())) + " ms ping");
+          });
+        })();
         this.statsStep = new Stats();
         this.statsStep.setMode(0);
-        this.statsStep.domElement.style.position = 'absolute';
         this.statsStep.domElement.style.left = '0px';
         this.statsStep.domElement.style.top = '0px';
         this.statsRender = new Stats();
         this.statsRender.setMode(0);
-        this.statsRender.domElement.style.position = 'absolute';
         this.statsRender.domElement.style.left = '0px';
         this.statsRender.domElement.style.top = '50px';
-        document.body.appendChild(this.statsStep.domElement);
-        return document.body.appendChild(this.statsRender.domElement);
+        $("#debughud").append(this.statsStep.domElement);
+        return $("#debughud").append(this.statsRender.domElement);
       },
       onStep: function(delta, time) {
-        var playerInputs;
+        var playerInput;
         if (this.input.pressed('dash')) {
           this.renderer.viewportWidth *= 1.05;
         }
@@ -72,11 +63,8 @@
         }
         if (this.networkCollector.isReady() && !this.game.finished) {
           this.statsStep.begin();
-          playerInputs = this.input.toWorld(this.renderer);
-          this.socket.emit('inputPacket', playerInputs.serialize(), this.networkCollector.frame + FRAME_OFFSET);
-          this.socket.emit('hashcode', this.game.hashCode(), this.networkCollector.frame);
-          this.networkCollector.putHash(this.game.hashCode());
-          this.networkCollector.loadFrame();
+          playerInput = this.input.toWorld(this.renderer);
+          this.networkCollector.advance(playerInput);
           this.game.step();
           this.checkWinCondition();
           this.input.mouse.down = false;

@@ -32,7 +32,11 @@ define [
 
     toWorld: (renderer) =>
       c = @clone()
-      c.mouse.location = renderer.worldVec2(new b2.Vec2(@mouse.x, @mouse.y))
+      c.mouse.location =
+        if renderer
+          renderer.worldVec2(new b2.Vec2(@mouse.x, @mouse.y))
+        else
+          new b2.Vec2(0, 0)
       delete c.mouse.x
       delete c.mouse.y
       c

@@ -67,13 +67,13 @@ settings = {
 
     player : {
                  walkForce : 4,
-                 jumpImpulse : -0.33281,
+                 jumpImpulse : -0.37281,
                  width : 0.2,
                  height : 0.6,
                  visionPolyDetail : 100,
              },
 
-    frameOffset : 1,
+    frameOffset : 5,
 };
 
 function newLobby() {

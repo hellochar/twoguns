@@ -2,9 +2,19 @@ define [
   'underscore'
   'game/inputs'
 ], (_, Inputs) ->
+
+  # Usage:
+  #   1. construct with given parameters
+  #   2. put() other players' inputs (and optionally putHash() your own hash)
+  #   3. call advance() with your next input to move the game forward (should only call this when
+  #   @isReady() == true)
+  #   4. checkHash() any hashes you recieve over the wire to ensure everyone's on the same game state
+  #
   class InputNetworkCollector
-    # array of game/player
-    constructor: (@players) ->
+    # players: array of game/player objects
+    # induces feedback latency equal to FRAME_OFFSET * (ms per frame)
+    constructor: (@game, @socket, @frameOffset) ->
+      @players = @game.players
       # each element is a {name -> Inputs}
       # inputGroups[i] == group for frame number @frame+i
       @inputGroups = []
@@ -15,10 +25,36 @@ define [
       # holds the hashCode for the game at frame [idx]
       @hashCodes = []
 
+      # advancedTimes[i] == unix millis when frame i was advanced
+      @advancedTimes = []
+
+      @latency = undefined
+
+      # start off by filling in the first FRAME_OFFSET inputs with no-ops
+      for frame in [0...@frameOffset]
+        for player in @players
+          @put(player.name, (new Inputs()).toWorld(), frame)
+
+    advance: (input) =>
+      throw new Error("frame #{@frame} isn't ready but is being loaded!") if not @isReady()
+      @advancedTimes[@frame] = (new Date()).valueOf()
+      thisLatency = @advancedTimes[@frame] - @advancedTimes[@frame - @frameOffset]
+      if not @latency
+        @latency = thisLatency
+      else
+        @latency = @latency * .95 + thisLatency * .05
+
+      @socket.emit('inputPacket', input.serialize(), @frame + @frameOffset)
+      @socket.emit('hashcode', @game.hashCode(), @frame)
+      @putHash(@game.hashCode())
+      @loadFrame()
+      @frame += 1
+
+    # approximate the latency
+    getLatency: () => @latency
+
     put: (playerName, inputs, frame) =>
-      # console.log("put input for #{frame}:#{playerName}")
       group = (@inputGroups[frame - @frame] ||= {})
-      # throw new Error("Put on already existing input!") if group[playerName]?
       group[playerName] ||= inputs
 
     putHash: (hash) =>
@@ -34,11 +70,10 @@ define [
       frameReadyNames = _.keys(@inputGroups[0])
       _.difference(@playerNames, frameReadyNames).length == 0 and @playerNames.length == frameReadyNames.length
 
+    # mutates each player in @players to have the input for the current frame
     loadFrame: () =>
-      throw new Error("frame #{@frame} isn't ready but is being loaded!") if not @isReady()
       group = @inputGroups.shift()
       [p.inputs = group[p.name] for p in @players]
-      @frame += 1
 
     checkHash: (hash, frame) =>
       throw new Error("Frame #{frame} desync: hash #{hash} doesn't match with mine #{@hashCodes[frame]}") if hash isnt @hashCodes[frame]

@@ -48,7 +48,7 @@
       Inputs.prototype.toWorld = function(renderer) {
         var c;
         c = this.clone();
-        c.mouse.location = renderer.worldVec2(new b2.Vec2(this.mouse.x, this.mouse.y));
+        c.mouse.location = renderer ? renderer.worldVec2(new b2.Vec2(this.mouse.x, this.mouse.y)) : new b2.Vec2(0, 0);
         delete c.mouse.x;
         delete c.mouse.y;
         return c;

@@ -11,9 +11,6 @@ define [
   'game/render/renderer'
 ], (_, b2, cq, Overlay, settings, Game, Inputs, Random, InputNetworkCollector, Renderer) ->
 
-  # induces feedback latency equal to FRAME_OFFSET * (ms per frame)
-  FRAME_OFFSET = settings.frameOffset
-
   framework = {
     isRunning: () -> !!@hasSetup
 
@@ -31,21 +28,12 @@ define [
       @game = new Game(gameProperties.mapWidth, gameProperties.mapHeight, gameProperties.playerNames, gameProperties.yourName, new Random(gameProperties.randomSeed))
       window.you = @game.youPlayer
       @renderer = new Renderer(18, @game, @cq)
-      @networkCollector = new InputNetworkCollector(@game.players)
-      # start off by filling in the first FRAME_OFFSET inputs with no-ops
-      for frame in [0...FRAME_OFFSET]
-        for player in @game.players
-          @networkCollector.put(player.name, (new Inputs()).toWorld(@renderer), frame)
+      @networkCollector = new InputNetworkCollector(@game, @socket, settings.frameOffset)
 
       # track calls to rayintersect and output it
       ( =>
         invocations = 0
-        indicator = $("<div/>").appendTo("body").css(
-          position: "absolute"
-          left: "0px"
-          top: "100px"
-          background: "white"
-        )
+        indicator = $("<div/>").appendTo("#debughud")
         $(@game).on('rayintersectall', () ->
           invocations += 1
         )
@@ -55,20 +43,25 @@ define [
         )
       )()
 
+      ( =>
+        latencydiv = $("<div>").appendTo("#debughud")
+        $(@game).on('poststep', () =>
+          latencydiv.text("#{Math.floor(@networkCollector.getLatency())} ms ping")
+        )
+      )()
+
       @statsStep = new Stats()
       @statsStep.setMode(0)
-      @statsStep.domElement.style.position = 'absolute'
       @statsStep.domElement.style.left = '0px'
       @statsStep.domElement.style.top = '0px'
 
       @statsRender = new Stats()
       @statsRender.setMode(0)
-      @statsRender.domElement.style.position = 'absolute'
       @statsRender.domElement.style.left = '0px'
       @statsRender.domElement.style.top = '50px'
 
-      document.body.appendChild( @statsStep.domElement )
-      document.body.appendChild( @statsRender.domElement )
+      $("#debughud").append( @statsStep.domElement )
+      $("#debughud").append( @statsRender.domElement )
 
     # game logic loop
     onStep: (delta, time) ->
@@ -78,14 +71,9 @@ define [
       if @networkCollector.isReady() and not @game.finished
         @statsStep.begin()
 
-        playerInputs = @input.toWorld(@renderer)
-        @socket.emit('inputPacket', playerInputs.serialize(), @networkCollector.frame + FRAME_OFFSET)
-        # console.log("sent input for #{@networkCollector.frame + FRAME_OFFSET}:#{@game.youPlayer.name}")
+        playerInput = @input.toWorld(@renderer)
+        @networkCollector.advance(playerInput)
 
-        @socket.emit('hashcode', @game.hashCode(), @networkCollector.frame)
-        @networkCollector.putHash(@game.hashCode())
-
-        @networkCollector.loadFrame()
         @game.step()
         @checkWinCondition()
         #hack; should be part of a feature to collect all events that have happened since last step
