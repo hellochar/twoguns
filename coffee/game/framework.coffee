@@ -20,6 +20,7 @@ define [
       @socket = socket
       @gameProperties = gameProperties
       @cq = cq().framework(this, this)
+      @cq.canvas.oncontextmenu = () -> false
       @cq.appendTo("body")
       @input = new Inputs(
         {x: @cq.canvas.width/2, y: @cq.canvas.height/2},

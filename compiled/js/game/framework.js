@@ -14,6 +14,9 @@
         this.socket = socket;
         this.gameProperties = gameProperties;
         this.cq = cq().framework(this, this);
+        this.cq.canvas.oncontextmenu = function() {
+          return false;
+        };
         this.cq.appendTo("body");
         this.input = new Inputs({
           x: this.cq.canvas.width / 2,
