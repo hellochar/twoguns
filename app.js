@@ -1,5 +1,6 @@
 if ( process.env.NODE_ENV === undefined ) {
-    throw new Error("No NODE_ENV found in environment!");
+    console.log("No NODE_ENV found in environment; assuming development!");
+    process.env.NODE_ENV = 'development';
 }
 
 var express = require('express')
@@ -14,6 +15,7 @@ var environment = require(path.join(__dirname, 'environments', process.env.NODE_
 PORT = environment.port || 80;
 
 app.configure(function() {
+    app.use(express.logger());
     app.use(express.static(path.join(__dirname, 'public')));
     app.use(express.bodyParser());
     app.use(express.static(path.join(__dirname, 'compiled')));
